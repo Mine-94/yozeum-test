@@ -25,6 +25,7 @@ function baseLayout({ title, description, ogUrl, bodyClass, content, themeColor 
 <meta name="twitter:title" content="${escapeHtml(title)}" />
 <meta name="twitter:description" content="${escapeHtml(description)}" />
 ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="${bodyClass || ''}">
@@ -48,7 +49,7 @@ function renderHome(quizzes) {
     .map(
       (q) => `
       <a href="/q/${q.id}" class="quiz-card" style="--accent:${q.themeColor}">
-        <div class="quiz-card-emoji">${q.emoji}</div>
+        <div class="quiz-card-badge">${q.emoji}</div>
         <h2>${escapeHtml(q.title)}</h2>
         <p>${escapeHtml(q.subtitle)}</p>
         <span class="quiz-card-cta">테스트 시작하기 →</span>
@@ -91,7 +92,7 @@ function renderQuizPage(quiz) {
   <header class="site-header quiz-header" style="--accent:${quiz.themeColor}">
     <div class="container">
       <a href="/" class="logo">요즘테스트</a>
-      <div class="quiz-hero-emoji">${quiz.emoji}</div>
+      <div class="quiz-hero-badge">${quiz.emoji}</div>
       <h1>${escapeHtml(quiz.title)}</h1>
       <p class="tagline">${escapeHtml(quiz.subtitle)}</p>
     </div>
@@ -144,7 +145,7 @@ function renderResultPage(quiz, resultKey) {
   <main class="container">
     <section class="tool-card result-card" style="--accent:${quiz.themeColor}">
       <p class="result-eyebrow">${escapeHtml(quiz.title)} 결과</p>
-      <div class="result-emoji">${result.emoji}</div>
+      <div class="result-badge">${result.emoji}</div>
       <h1>${escapeHtml(result.title)}</h1>
       <p class="result-desc">${escapeHtml(result.desc)}</p>
 
