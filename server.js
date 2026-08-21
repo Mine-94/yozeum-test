@@ -3,7 +3,7 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
-const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER } = require('./lib/fortune');
+const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
   renderQuizPage,
@@ -14,6 +14,7 @@ const {
   renderUnseResult,
   renderGunghapForm,
   renderGunghapResult,
+  renderIlganPage,
   SITE_URL,
 } = require('./views/render');
 
@@ -22,7 +23,7 @@ const PORT = process.env.PORT || 3000;
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 60,
+  max: 300, // 정적 리소스(css/js)도 이 리미터를 통과하므로, 페이지 하나만 봐도 여러 요청이 소모됩니다.
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -55,7 +56,23 @@ app.get('/sitemap.xml', (req, res) => {
     '/privacy.html',
     '/terms.html',
   ];
-  const urls = staticPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
+
+  // 오늘의 띠별 운세: /unse/:animal (12개) — 기존 라우트지만 sitemap에서 누락돼 있었음
+  const unsePaths = TTI_ORDER.map((a) => `/unse/${a}`);
+
+  // 띠 궁합: /gunghap/r/:my/:partner (12×12=144, 순서쌍 전체 — my/partner가 바뀌면 문구가 달라지므로 모두 포함)
+  const gunghapPaths = [];
+  TTI_ORDER.forEach((my) => {
+    TTI_ORDER.forEach((partner) => {
+      gunghapPaths.push(`/gunghap/r/${my}/${partner}`);
+    });
+  });
+
+  // 일간(日干) 랜딩 페이지: /ilgan/:stemKey (10개, "OO목 성격" 등 검색어 타겟)
+  const ilganPaths = STEM_ROMAN.map((k) => `/ilgan/${k}`);
+
+  const allPaths = [...staticPaths, ...unsePaths, ...gunghapPaths, ...ilganPaths];
+  const urls = allPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
   res.type('application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
 });
@@ -135,6 +152,12 @@ app.get('/saju/r/:year/:month/:day/:time', (req, res) => {
   } catch (e) {
     res.send(renderSajuForm({ error: '입력하신 날짜를 계산할 수 없어요. 날짜를 다시 확인해주세요.' }));
   }
+});
+
+// --- 일간(日干) 단독 랜딩 페이지 ---
+app.get('/ilgan/:stemKey', (req, res) => {
+  if (!STEM_ROMAN_TO_KO[req.params.stemKey]) return res.redirect('/saju');
+  res.send(renderIlganPage(req.params.stemKey));
 });
 
 // --- 오늘의 띠별 운세 ---

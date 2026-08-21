@@ -63,6 +63,23 @@ check_status "sitemap.xml" "$BASE/sitemap.xml" 200
 check_contains "sitemap에 /saju 포함" "$BASE/sitemap.xml" "/saju"
 check_contains "sitemap에 /unse 포함" "$BASE/sitemap.xml" "/unse"
 check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
+check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
+check_contains "sitemap에 /gunghap/r/rat/ox(궁합 조합) 포함" "$BASE/sitemap.xml" "/gunghap/r/rat/ox<"
+check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
+check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/sitemap.xml" "/ilgan/gye<"
+
+curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
+url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
+quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
+expected=$((6 + quiz_count + 12 + 144 + 10))
+echo "sitemap내 URL수: $url_count (기대값: 정적6+퀴즈${quiz_count}+운세12+궁합144+일간10=${expected})"
+if [ "$url_count" == "$expected" ]; then
+  echo "PASS  sitemap URL 수가 예상과 일치"
+  pass=$((pass+1))
+else
+  echo "FAIL  sitemap URL 수 불일치 (got $url_count, expected $expected)"
+  fail=$((fail+1))
+fi
 
 echo ""
 echo "=== 기존 퀴즈 회귀 테스트 ==="
@@ -118,6 +135,31 @@ check_contains "신자진 삼합 관계 판정" "$BASE/gunghap/r/rat/dragon" "�
 check_contains "동갑띠 판정" "$BASE/gunghap/r/rat/rat" "동갑띠"
 check_contains "평범한 관계 판정(무관계 쌍)" "$BASE/gunghap/r/rat/tiger" "평범한 관계"
 check_status "잘못된 띠 파라미터 → 폼 리다이렉트" "$BASE/gunghap/r/xxx/yyy" 302
+
+echo ""
+echo "=== 일간(日干) 랜딩 페이지 ==="
+for k in gap eul byeong jeong mu gi gyeong sin im gye; do
+  check_status "일간 랜딩: $k" "$BASE/ilgan/$k" 200
+done
+check_contains "갑목 페이지에 오행 성격 노출" "$BASE/ilgan/gap" "갑목"
+check_contains "갑목 페이지에 다른 일간 링크그리드" "$BASE/ilgan/gap" "link-grid"
+check_status "잘못된 일간 키 → /saju로 리다이렉트" "$BASE/ilgan/notakey" 302
+
+echo ""
+echo "=== 내부 링크 그리드(폼 화면) ==="
+check_contains "사주 폼에 일간별 링크그리드" "$BASE/saju" "link-grid"
+check_contains "궁합 폼에 인기 조합 링크그리드" "$BASE/gunghap" "link-grid"
+
+echo ""
+echo "=== 네이버 서치어드바이저 검증 태그 (env 미설정 시 노출 안함) ==="
+curl -s "$BASE/" -o /tmp/yozeum_resp.html
+if grep -q "naver-site-verification" /tmp/yozeum_resp.html; then
+  echo "FAIL  env 미설정인데 naver-site-verification 태그가 출력됨"
+  fail=$((fail+1))
+else
+  echo "PASS  env 미설정 시 naver-site-verification 태그 없음"
+  pass=$((pass+1))
+fi
 
 echo ""
 echo "=== 결과 ==="

@@ -401,3 +401,34 @@ main { padding-bottom: 40px; }
   .saju-table { font-size: 0.82rem; }
   .wuxing-bar-label { width: 40px; font-size: 0.78rem; }
 }
+
+/* SEO 내부 링크 그리드 (폼 화면에서 관련 결과 페이지로 연결) */
+.link-grid {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.link-grid-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+.link-grid-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.link-grid-item {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  text-decoration: none;
+}
+.link-grid-item:hover {
+  border-color: var(--accent, var(--primary));
+}

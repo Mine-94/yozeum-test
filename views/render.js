@@ -6,10 +6,20 @@ const {
   TTI_COMPAT_TEXT,
   DAILY_FORTUNE_POOL,
 } = require('../data/fortune-content');
-const { TTI_ORDER, getTodayKST, pickSeeded } = require('../lib/fortune');
+const {
+  TTI_ORDER,
+  getTodayKST,
+  pickSeeded,
+  STEM_ROMAN,
+  STEM_ROMAN_TO_KO,
+  STEM_KO_TO_ROMAN,
+  STEM_ROMAN_TO_ELEMENT,
+  STEM_ROMAN_TO_YINYANG,
+} = require('../lib/fortune');
 
 const SITE_NAME = '요즘테스트';
 const SITE_URL = process.env.SITE_URL || 'https://example.onrender.com'; // 배포 후 실제 도메인으로 교체하세요
+const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 
 const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -27,6 +37,13 @@ function formatTodayKorean(dateStr) {
   return `${y}년 ${m}월 ${d}일 (${WEEKDAY_KO[dt.getUTCDay()]}요일)`;
 }
 
+// 검색어 노출용 짧은 날짜 표기(예: "8월21일") — "8월21일 오늘의 운세" 형태의
+// 실제 검색 패턴에 맞춰 title/description 맨 앞에 노출하기 위한 포맷입니다.
+function formatTodayKoreanShort(dateStr) {
+  const [, m, d] = dateStr.split('-').map(Number);
+  return `${m}월${d}일`;
+}
+
 function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor }) {
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -36,6 +53,7 @@ function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, conten
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
 <link rel="canonical" href="${escapeHtml(canonicalUrl || ogUrl)}" />
+${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${escapeHtml(NAVER_SITE_VERIFICATION)}" />` : ''}
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="${SITE_NAME}" />
 <meta property="og:title" content="${escapeHtml(title)}" />
@@ -345,6 +363,16 @@ function renderSajuForm({ error } = {}) {
       <button type="submit" class="quiz-btn">사주팔자 계산하기</button>
     </form>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">본 계산기는 양력 생년월일(시)을 기준으로 절기(입춘 등)를 반영해 년·월·일·시주를 계산하는 정식 사주 계산기입니다. 다만 실제 사주 해석은 십성·용신·격국 등 훨씬 복잡한 요소를 함께 봐야 하므로, 본 결과는 오행 분포와 일간 기준의 간이 해설로 참고만 해주세요.</p>
+    <div class="link-grid">
+      <p class="link-grid-title">일간(日干)별 성격이 궁금하다면?</p>
+      <div class="link-grid-items">
+        ${STEM_ROMAN.map((rk) => {
+          const ko = STEM_ROMAN_TO_KO[rk];
+          const el = STEM_ROMAN_TO_ELEMENT[rk];
+          return `<a href="/ilgan/${rk}" class="link-grid-item">${ko}${el} 성격</a>`;
+        }).join('\n        ')}
+      </div>
+    </div>
   `;
 
   return formPageShell({
@@ -450,6 +478,61 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
   });
 }
 
+// --- 일간(日干) 단독 랜딩 페이지 (예: "갑목 성격" 검색어 타겟) ---
+// 생년월일 계산 없이 일간 하나만으로 성격 콘텐츠를 보여주는 SEO용 정적 랜딩 페이지입니다.
+const ILGAN_ACCENT = '#5b4b8a';
+
+function renderIlganPage(stemRomanKey) {
+  const ko = STEM_ROMAN_TO_KO[stemRomanKey];
+  const el = STEM_ROMAN_TO_ELEMENT[stemRomanKey];
+  const yy = STEM_ROMAN_TO_YINYANG[stemRomanKey];
+  const stemInfo = STEM_CONTENT[ko];
+  const wx = WUXING_CONTENT[el];
+  const pageUrl = `${SITE_URL}/ilgan/${stemRomanKey}`;
+
+  const otherStemsHtml = STEM_ROMAN.filter((rk) => rk !== stemRomanKey)
+    .map((rk) => {
+      const oko = STEM_ROMAN_TO_KO[rk];
+      const oel = STEM_ROMAN_TO_ELEMENT[rk];
+      return `<a href="/ilgan/${rk}" class="link-grid-item">${oko}${oel} 성격</a>`;
+    })
+    .join('\n        ');
+
+  const bodyHtml = `
+    <p class="result-desc" style="text-align:center;margin-bottom:20px;">일간(日干) ${ko}(${el}) · ${yy === '양' ? '양간(陽干)' : '음간(陰干)'}</p>
+    <div class="compat-box">
+      <p class="result-eyebrow">${ko}일간은 이런 상징을 가져요</p>
+      <p class="result-desc"><strong>${stemInfo.symbol}</strong>. ${stemInfo.desc}</p>
+    </div>
+    <h2 style="font-size:1.05rem;margin:24px 0 10px;">${el}(${el === '목' ? '木' : el === '화' ? '火' : el === '토' ? '土' : el === '금' ? '金' : '水'}) 기운의 특징</h2>
+    <p class="result-desc">${wx.trait}. ${wx.many}</p>
+    <p class="result-desc" style="margin-top:16px;">일간은 사주팔자 여덟 글자 중에서도 '나 자신'을 상징하는 가장 중요한 글자예요. 다만 실제 나의 일간이 무엇인지, 그리고 오행 전체 분포까지 정확히 알려면 정식 사주 계산이 필요해요.</p>
+    <div class="result-actions" style="margin-top:8px;">
+      <a href="/saju" class="quiz-btn">내 일간 정확히 계산하기 →</a>
+    </div>
+    <div class="link-grid">
+      <p class="link-grid-title">다른 일간도 확인해보세요</p>
+      <div class="link-grid-items">
+        ${otherStemsHtml}
+      </div>
+    </div>
+    <p class="disclaimer" style="text-align:left;margin-top:20px;">이 페이지는 일간 하나만으로 보는 간이 상징·성격 해설이며, 실제 사주 해석은 년·월·일·시주 전체와 오행 분포, 십성·용신 등을 함께 봐야 훨씬 정확해요.</p>
+  `;
+
+  return resultPageShell({
+    accent: ILGAN_ACCENT,
+    eyebrow: '일간(日干) 성격',
+    emoji: '🔮',
+    titleHtml: `${ko}일간(${ko}${el}) 성격`,
+    bodyHtml,
+    ogUrl: pageUrl,
+    ogTitle: `${ko}${el} 성격 — 일간 ${ko}일간이란? - ${SITE_NAME}`,
+    description: `일간 ${ko}(${el}) 성격 해설. ${stemInfo.symbol} — ${stemInfo.desc}`,
+    backHref: '/saju',
+    backLabel: '내 사주팔자 계산하기',
+  });
+}
+
 // --- 오늘의 띠별 운세 ---
 function dailyLinesFor(animalKey, dateStr) {
   const categories = ['총운', '애정운', '금전운', '건강운'];
@@ -463,6 +546,7 @@ function dailyLinesFor(animalKey, dateStr) {
 function renderUnseHome() {
   const dateStr = getTodayKST();
   const todayKo = formatTodayKorean(dateStr);
+  const todayShort = formatTodayKoreanShort(dateStr);
 
   const cards = TTI_ORDER.map((key) => {
     const info = TTI_CONTENT[key];
@@ -514,8 +598,8 @@ function renderUnseHome() {
   </main>`;
 
   return baseLayout({
-    title: `오늘의 띠별 운세 (${todayKo}) - ${SITE_NAME}`,
-    description: `${todayKo} 기준 12띠 오늘의 총운·애정운·금전운·건강운을 확인해보세요.`,
+    title: `${todayShort} 오늘의 띠별 운세 - ${SITE_NAME}`,
+    description: `${todayShort} 오늘의 띠별 운세. ${todayKo} 기준 12띠 총운·애정운·금전운·건강운을 확인해보세요.`,
     ogUrl: `${SITE_URL}/unse`,
     themeColor: '#c9622a',
     content,
@@ -525,6 +609,7 @@ function renderUnseHome() {
 function renderUnseResult(animalKey) {
   const dateStr = getTodayKST();
   const todayKo = formatTodayKorean(dateStr);
+  const todayShort = formatTodayKoreanShort(dateStr);
   const info = TTI_CONTENT[animalKey];
   const lines = dailyLinesFor(animalKey, dateStr);
   const shareUrl = `${SITE_URL}/unse/${animalKey}`;
@@ -552,8 +637,8 @@ function renderUnseResult(animalKey) {
     titleHtml: `${info.name}띠, 오늘의 운세`,
     bodyHtml,
     ogUrl: shareUrl,
-    ogTitle: `${info.name}띠 오늘의 운세 (${todayKo}) - ${SITE_NAME}`,
-    description: lines['총운'],
+    ogTitle: `${todayShort} ${info.name}띠 오늘의 운세 - ${SITE_NAME}`,
+    description: `${todayShort} ${info.name}띠 오늘의 운세 — ${lines['총운']}`,
     backHref: '/unse',
     backLabel: '다른 띠 운세도 보기',
     shareUrl,
@@ -562,6 +647,18 @@ function renderUnseResult(animalKey) {
 }
 
 // --- 띠 궁합 ---
+// 폼 화면에 노출할 인기 조합 예시(전체 144쌍은 sitemap에만 반영, 폼에는 대표 8쌍만 노출)
+const GUNGHAP_FEATURED = [
+  ['tiger', 'horse'],
+  ['rat', 'ox'],
+  ['rat', 'horse'],
+  ['snake', 'monkey'],
+  ['dragon', 'rooster'],
+  ['rabbit', 'dog'],
+  ['pig', 'rabbit'],
+  ['monkey', 'rat'],
+];
+
 function renderGunghapForm({ prefillMy } = {}) {
   const options = (selected) =>
     TTI_ORDER.map((key) => {
@@ -585,6 +682,16 @@ function renderGunghapForm({ prefillMy } = {}) {
       <button type="submit" class="quiz-btn">궁합 확인하기</button>
     </form>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">내 띠를 정확히 모르겠다면 <a href="/saju">사주팔자 계산기</a>에서 절기 기준으로 정확하게 확인할 수 있어요(1~2월생은 특히 추천).</p>
+    <div class="link-grid">
+      <p class="link-grid-title">인기 궁합 조합 바로 보기</p>
+      <div class="link-grid-items">
+        ${GUNGHAP_FEATURED.map(([a, b]) => {
+          const ia = TTI_CONTENT[a];
+          const ib = TTI_CONTENT[b];
+          return `<a href="/gunghap/r/${a}/${b}" class="link-grid-item">${ia.emoji}${ia.name}띠 × ${ib.emoji}${ib.name}띠</a>`;
+        }).join('\n        ')}
+      </div>
+    </div>
   `;
 
   return formPageShell({
@@ -643,6 +750,7 @@ module.exports = {
   renderUnseResult,
   renderGunghapForm,
   renderGunghapResult,
+  renderIlganPage,
   formatTodayKorean,
   SITE_NAME,
   SITE_URL,
