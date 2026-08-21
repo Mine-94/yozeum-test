@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "express": "^4.21.0",
-    "express-rate-limit": "^7.4.0"
+    "express-rate-limit": "^7.4.0",
+    "lunar-javascript": "^1.7.7"
   },
   "license": "MIT"
 }
