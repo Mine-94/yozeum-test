@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function trackShare(method) {
     if (typeof window.gtag === 'function') {
-      window.gtag('event', 'result_share', {
+      window.gtag('event', 'share_success', {
         method,
         page_path: window.location.pathname,
       });
