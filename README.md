@@ -50,6 +50,8 @@ npm start
 3. Build Command: `npm install`, Start Command: `npm start`.
 4. 배포 후 발급받은 실제 도메인을 `SITE_URL` 환경변수로 설정하세요. Render 환경변수에 `SITE_URL=https://실제도메인` 형태로 추가하면 됩니다. **og:url·트위터카드·사이트맵·robots.txt 전부 이 값을 사용하므로 필수입니다.**
 5. (선택·권장) 네이버 서치어드바이저에서 사이트 등록 후 "HTML 태그" 방식으로 발급되는 `content` 값을 `NAVER_SITE_VERIFICATION` 환경변수로 설정하면 소유 확인 태그가 자동으로 출력됩니다.
+6. AdSense용 `ADSENSE_CLIENT_ID`(예: `ca-pub-...`)를 설정하면 광고 스크립트가 출력됩니다. `/ads.txt`는 같은 게시자 ID로 서버가 자동 응답합니다.
+7. (선택·권장) Google Analytics 4 측정 ID를 `GA_MEASUREMENT_ID`(예: `G-XXXXXXXXXX`)로 설정하면 전 페이지에 측정 태그가 자동으로 출력됩니다.
 
 ## 5-1. 테스트
 

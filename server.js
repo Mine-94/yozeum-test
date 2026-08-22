@@ -20,6 +20,7 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADSENSE_PUBLISHER_ID = (process.env.ADSENSE_CLIENT_ID || 'ca-pub-8602848692420724').replace(/^ca-/, '');
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
@@ -30,6 +31,14 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// AdSense가 소유권과 판매자 정보를 확인할 수 있도록 반드시 루트에서
+// text/plain으로 응답합니다. catch-all 리다이렉트보다 먼저 선언해야 합니다.
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.send(`google.com, ${ADSENSE_PUBLISHER_ID}, DIRECT, f08c47fec0942fa0\n`);
+});
 
 function findQuiz(id) {
   return quizzes.find((q) => q.id === id);
@@ -60,10 +69,10 @@ app.get('/sitemap.xml', (req, res) => {
   // 오늘의 띠별 운세: /unse/:animal (12개) — 기존 라우트지만 sitemap에서 누락돼 있었음
   const unsePaths = TTI_ORDER.map((a) => `/unse/${a}`);
 
-  // 띠 궁합: /gunghap/r/:my/:partner (12×12=144, 순서쌍 전체 — my/partner가 바뀌면 문구가 달라지므로 모두 포함)
+  // 띠 궁합은 두 띠의 관계가 대칭이므로 정규 조합(중복 없는 78개)만 색인합니다.
   const gunghapPaths = [];
-  TTI_ORDER.forEach((my) => {
-    TTI_ORDER.forEach((partner) => {
+  TTI_ORDER.forEach((my, myIndex) => {
+    TTI_ORDER.slice(myIndex).forEach((partner) => {
       gunghapPaths.push(`/gunghap/r/${my}/${partner}`);
     });
   });
@@ -194,12 +203,16 @@ app.get('/gunghap/compute', (req, res) => {
   if (!TTI_ORDER.includes(my) || !TTI_ORDER.includes(partner)) {
     return res.redirect('/gunghap');
   }
-  res.redirect(`/gunghap/r/${my}/${partner}`);
+  const pair = [my, partner].sort((a, b) => TTI_ORDER.indexOf(a) - TTI_ORDER.indexOf(b));
+  res.redirect(`/gunghap/r/${pair[0]}/${pair[1]}`);
 });
 
 app.get('/gunghap/r/:my/:partner', (req, res) => {
   const { my, partner } = req.params;
   if (!TTI_ORDER.includes(my) || !TTI_ORDER.includes(partner)) return res.redirect('/gunghap');
+  if (TTI_ORDER.indexOf(my) > TTI_ORDER.indexOf(partner)) {
+    return res.redirect(301, `/gunghap/r/${partner}/${my}`);
+  }
   const relation = getTtiRelation(my, partner);
   res.send(renderGunghapResult(my, partner, relation));
 });

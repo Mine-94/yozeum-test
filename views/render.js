@@ -21,6 +21,7 @@ const SITE_NAME = '요즘테스트';
 const SITE_URL = process.env.SITE_URL || 'https://example.onrender.com'; // 배포 후 실제 도메인으로 교체하세요
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
+const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || ''; // 예: G-XXXXXXXXXX
 
 const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -45,7 +46,11 @@ function formatTodayKoreanShort(dateStr) {
   return `${m}월${d}일`;
 }
 
-function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor }) {
+function serializeJsonLd(data) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData }) {
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -64,9 +69,12 @@ ${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${esc
 <meta name="twitter:title" content="${escapeHtml(title)}" />
 <meta name="twitter:description" content="${escapeHtml(description)}" />
 ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
+${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
 ${ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
+${GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${escapeHtml(GA_MEASUREMENT_ID)}');</script>` : ''}
 </head>
 <body class="${bodyClass || ''}">
 ${content}
@@ -195,6 +203,7 @@ function renderHome(quizzes, fortuneTools) {
   <header class="site-header">
     <div class="container">
       <a href="/" class="logo">${SITE_NAME}</a>
+      <h1 class="home-title">무료 사주·운세·심리테스트</h1>
       <p class="tagline">사주·운세부터 요즘 화제인 테스트까지 — 무료, 회원가입 없이</p>
     </div>
   </header>
@@ -223,6 +232,14 @@ function renderHome(quizzes, fortuneTools) {
     title: '요즘테스트 - 사주팔자·오늘의 운세·심리테스트 모음',
     description: '정식 사주팔자 계산, 오늘의 띠별 운세, 띠 궁합부터 요즘 SNS 화제 심리테스트·밸런스게임까지 한곳에서 무료로.',
     ogUrl: `${SITE_URL}/`,
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      description: '무료 사주팔자 계산, 오늘의 띠별 운세, 띠 궁합, 심리테스트 모음',
+      inLanguage: 'ko-KR',
+    },
     content,
   });
 }
