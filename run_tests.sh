@@ -94,12 +94,19 @@ check_status "존재하지 않는 퀴즈 → 홈 리다이렉트" "$BASE/q/nope"
 echo ""
 echo "=== 사주팔자 계산기 ==="
 check_status "사주 폼" "$BASE/saju" 200
+check_contains "사주 폼 H1에 무료 만세력 검색어" "$BASE/saju" "무료 만세력·사주팔자 오행 계산기"
+check_contains "사주 폼 메타 설명에 양력·절기·오행 정보" "$BASE/saju" "무료 만세력과 사주팔자 오행 계산기"
+check_contains "사주 폼에 FAQ 구조화데이터" "$BASE/saju" '"@type":"FAQPage"'
+check_contains "사주 폼에 출생시간 FAQ" "$BASE/saju" "태어난 시간을 몰라도 계산할 수 있나요?"
+check_contains "사주 폼에 결과 읽는 순서" "$BASE/saju" "만세력 결과는 이 순서로 확인하세요"
 check_redirect_location "compute(시간있음)→결과 리다이렉트" "$BASE/saju/compute?year=1990&month=5&day=20&hour=14" "/saju/r/1990/5/20/14"
 check_status "결과(시간있음, 1990-05-20 14시)" "$BASE/saju/r/1990/5/20/14" 200
 check_contains "1990-05-20 년주=庚午" "$BASE/saju/r/1990/5/20/14" "庚午"
 check_contains "1990-05-20 14시 시주=癸未" "$BASE/saju/r/1990/5/20/14" "癸未"
+check_contains "시간있음 결과는 8글자 기준" "$BASE/saju/r/1990/5/20/14" "8글자 기준"
 check_status "결과(시간모름)" "$BASE/saju/r/1990/5/20/unknown" 200
 check_contains "시간모름 안내문구" "$BASE/saju/r/1990/5/20/unknown" "시주는 계산에서 제외"
+check_contains "시간모름 결과는 6글자 기준" "$BASE/saju/r/1990/5/20/unknown" "6글자 기준"
 
 echo "--- 입춘 경계 테스트 (2000년, 절기 반영 여부) ---"
 check_contains "2000-02-03(입춘 전)→己卯" "$BASE/saju/r/2000/2/3/unknown" "己卯"

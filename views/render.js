@@ -93,7 +93,7 @@ ${content}
 }
 
 // --- 공통 셸 ---
-function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, description }) {
+function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, description, structuredData, extraHtml }) {
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
     <div class="container">
@@ -112,6 +112,8 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
     <div class="ad-slot ad-slot-bottom">
       <div class="ad-placeholder">광고 영역 (하단)</div>
     </div>
+
+    ${extraHtml || ''}
   </main>`;
 
   return baseLayout({
@@ -120,6 +122,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
     ogUrl,
     themeColor: accent,
     content,
+    structuredData,
   });
 }
 
@@ -344,8 +347,58 @@ function renderSajuForm({ error } = {}) {
   const yearOptions = [];
   for (let y = 2026; y >= 1920; y -= 1) yearOptions.push(y);
 
+  const faqItems = [
+    {
+      question: '만세력이란 무엇인가요?',
+      answer: '태어난 연·월·일·시를 천간과 지지로 바꾸어 년주·월주·일주·시주의 네 기둥을 확인하는 표입니다. 이 계산기는 절기 경계를 반영해 네 기둥과 오행 분포를 보여줍니다.',
+    },
+    {
+      question: '태어난 시간을 몰라도 계산할 수 있나요?',
+      answer: '가능합니다. 출생시간을 모르면 시주는 제외하고 년주·월주·일주의 여섯 글자를 계산합니다. 따라서 오행 분포도 여섯 글자 기준으로 표시됩니다.',
+    },
+    {
+      question: '양력과 음력 중 어떤 날짜를 입력하나요?',
+      answer: '현재 계산기는 양력 생년월일 입력만 지원합니다. 음력 생일만 알고 있다면 먼저 양력 날짜로 변환한 뒤 입력해야 합니다.',
+    },
+    {
+      question: '오행 개수만으로 사주를 판단할 수 있나요?',
+      answer: '아닙니다. 이 페이지의 오행 분포는 사주 여덟 글자 또는 시간 미상 시 여섯 글자의 기본 오행을 센 간이 지표입니다. 실제 해석에는 십성·용신·격국 등 다른 요소도 함께 필요합니다.',
+    },
+  ];
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  };
+
+  const extraHtml = `
+    <section class="info-card">
+      <h2>만세력 결과는 이 순서로 확인하세요</h2>
+      <ol class="result-desc" style="text-align:left;line-height:1.8;padding-left:20px;">
+        <li><strong>일간(日干)</strong> — 일주의 첫 글자로, 나 자신을 상징합니다.</li>
+        <li><strong>오행 분포</strong> — 목·화·토·금·수의 기본 개수와 상대적인 강약을 봅니다.</li>
+        <li><strong>네 기둥</strong> — 년주·월주·일주·시주를 함께 확인합니다. 시간을 모르면 시주는 제외됩니다.</li>
+      </ol>
+    </section>
+    <section class="info-card">
+      <h2>무료 만세력 자주 묻는 질문</h2>
+      ${faqItems
+        .map(
+          (item) => `<details style="text-align:left;margin:12px 0;">
+        <summary style="cursor:pointer;font-weight:700;">${escapeHtml(item.question)}</summary>
+        <p class="result-desc" style="margin:8px 0 0;">${escapeHtml(item.answer)}</p>
+      </details>`,
+        )
+        .join('')}
+    </section>`;
+
   const formHtml = `
-    <p class="tool-desc">태어난 연·월·일(가능하면 시각까지)을 입력하면 절기(입춘) 경계를 반영한 정식 사주팔자를 계산해드려요. 시각을 모르면 비워두셔도 년·월·일주는 정확하게 계산돼요.</p>
+    <p class="tool-desc">태어난 양력 연·월·일과 출생시간을 입력하면 절기(입춘 등) 경계를 반영해 년주·월주·일주·시주와 오행 분포를 계산합니다. 시각을 모르면 년·월·일주만 확인할 수 있어요.</p>
     ${error ? `<p class="form-error">${escapeHtml(error)}</p>` : ''}
     <form action="/saju/compute" method="GET">
       <div class="form-row">
@@ -379,7 +432,7 @@ function renderSajuForm({ error } = {}) {
           ${HOUR_OPTIONS.map((h) => `<option value="${h}">${String(h).padStart(2, '0')}시대 (${h}:00~${h}:59)</option>`).join('')}
         </select>
       </div>
-      <button type="submit" class="quiz-btn">사주팔자 계산하기</button>
+      <button type="submit" class="quiz-btn">무료 만세력 계산하기</button>
     </form>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">본 계산기는 양력 생년월일(시)을 기준으로 절기(입춘 등)를 반영해 년·월·일·시주를 계산하는 정식 사주 계산기입니다. 다만 실제 사주 해석은 십성·용신·격국 등 훨씬 복잡한 요소를 함께 봐야 하므로, 본 결과는 오행 분포와 일간 기준의 간이 해설로 참고만 해주세요.</p>
     <div class="link-grid">
@@ -397,11 +450,13 @@ function renderSajuForm({ error } = {}) {
   return formPageShell({
     accent: '#5b4b8a',
     emoji: '🔮',
-    title: '정식 사주팔자 계산기',
-    subtitle: '생년월일(시)로 년·월·일·시주와 오행 분포를 정확하게 계산해드려요',
+    title: '무료 만세력·사주팔자 오행 계산기',
+    subtitle: '양력 생년월일시로 일간·오행·년월일시주를 절기 기준으로 계산해요',
     formHtml,
     ogUrl: `${SITE_URL}/saju`,
-    description: '절기(입춘) 경계를 반영한 정식 사주팔자 계산기. 생년월일시로 년·월·일·시주와 오행 분포, 일간 성격까지 확인하세요.',
+    description: '무료 만세력과 사주팔자 오행 계산기. 양력 생년월일시를 입력하면 절기 경계를 반영한 년·월·일·시주, 일간과 목화토금수 오행 분포를 확인할 수 있어요.',
+    structuredData,
+    extraHtml,
   });
 }
 
@@ -457,12 +512,23 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
     ? `<p class="result-desc">오행 중에서는 <strong>${WUXING_CONTENT[dominant.maxKey].label}</strong>(${WUXING_CONTENT[dominant.maxKey].trait}) 기운이 가장 강하게 나타나요. ${WUXING_CONTENT[dominant.maxKey].many} 반대로 <strong>${WUXING_CONTENT[dominant.minKey].label}</strong> 기운은 상대적으로 약한 편이에요. ${WUXING_CONTENT[dominant.minKey].few}</p>`
     : '';
 
+  const missingElements = Object.entries(wuxingCounts)
+    .filter(([, count]) => count === 0)
+    .map(([key]) => WUXING_CONTENT[key].label);
+  const elementCount = Object.values(wuxingCounts).reduce((sum, count) => sum + count, 0);
+  const wuxingSummaryHtml = `<p class="result-desc" style="margin:0 0 12px;">총 <strong>${elementCount}글자 기준</strong>으로 센 기본 오행 분포예요.${
+    missingElements.length
+      ? ` 기본 오행이 없는 항목은 <strong>${missingElements.join(', ')}</strong>예요. 다만 개수가 0이라고 해서 곧바로 나쁘다는 뜻은 아닙니다.`
+      : ' 다섯 오행이 모두 포함되어 있어요.'
+  }</p>`;
+
   const bodyHtml = `
     <p class="result-desc" style="text-align:center;margin-bottom:20px;">${year}년 ${month}월 ${day}일생${hasTime ? '' : ' · 시간 미입력'}</p>
     ${pillarTableHtml}
     <h2 style="font-size:1.05rem;margin:24px 0 10px;">나를 상징하는 일간(日干) — ${dayStemKo}(${pillars.day.hanja[0]})</h2>
     <p class="result-desc"><strong>${stemInfo.symbol}</strong>. ${stemInfo.desc}</p>
     <h2 style="font-size:1.05rem;margin:24px 0 10px;">오행(五行) 분포</h2>
+    ${wuxingSummaryHtml}
     ${wuxingHtml}
     ${dominantHtml}
     ${
