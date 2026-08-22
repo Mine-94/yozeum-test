@@ -20,6 +20,7 @@ const {
 const SITE_NAME = '요즘테스트';
 const SITE_URL = process.env.SITE_URL || 'https://example.onrender.com'; // 배포 후 실제 도메인으로 교체하세요
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
+const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
 
 const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -65,6 +66,7 @@ ${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${esc
 ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
+${ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
 </head>
 <body class="${bodyClass || ''}">
 ${content}
