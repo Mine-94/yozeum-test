@@ -55,8 +55,12 @@ echo "=== 기본 페이지 ==="
 check_status "홈" "$BASE/" 200
 check_contains "홈에 사주·운세 섹션" "$BASE/" "사주"
 check_contains "홈에 트렌드 테스트 섹션" "$BASE/" "트렌드 테스트"
+check_contains "홈에 검색용 H1" "$BASE/" "<h1 class=\"home-title\">무료 사주·운세·심리테스트</h1>"
+check_contains "홈에 WebSite 구조화데이터" "$BASE/" '"@type":"WebSite"'
 check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
+check_status "ads.txt" "$BASE/ads.txt" 200
+check_contains "ads.txt 판매자 레코드" "$BASE/ads.txt" "google.com, pub-8602848692420724, DIRECT, f08c47fec0942fa0"
 check_status "robots.txt" "$BASE/robots.txt" 200
 check_contains "robots.txt sitemap 링크" "$BASE/robots.txt" "Sitemap:"
 check_status "sitemap.xml" "$BASE/sitemap.xml" 200
@@ -64,15 +68,15 @@ check_contains "sitemap에 /saju 포함" "$BASE/sitemap.xml" "/saju"
 check_contains "sitemap에 /unse 포함" "$BASE/sitemap.xml" "/unse"
 check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
 check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
-check_contains "sitemap에 /gunghap/r/rat/ox(궁합 조합) 포함" "$BASE/sitemap.xml" "/gunghap/r/rat/ox<"
+check_contains "sitemap에 /gunghap/r/rat/ox(정규 궁합 조합) 포함" "$BASE/sitemap.xml" "/gunghap/r/rat/ox<"
 check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
 check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/sitemap.xml" "/ilgan/gye<"
 
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((6 + quiz_count + 12 + 144 + 10))
-echo "sitemap내 URL수: $url_count (기대값: 정적6+퀴즈${quiz_count}+운세12+궁합144+일간10=${expected})"
+expected=$((6 + quiz_count + 12 + 78 + 10))
+echo "sitemap내 URL수: $url_count (기대값: 정적6+퀴즈${quiz_count}+운세12+궁합78+일간10=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -134,6 +138,8 @@ check_contains "자축 육합 관계 판정" "$BASE/gunghap/r/rat/ox" "육합"
 check_contains "신자진 삼합 관계 판정" "$BASE/gunghap/r/rat/dragon" "삼합"
 check_contains "동갑띠 판정" "$BASE/gunghap/r/rat/rat" "동갑띠"
 check_contains "평범한 관계 판정(무관계 쌍)" "$BASE/gunghap/r/rat/tiger" "평범한 관계"
+check_status "역순 궁합 URL은 정규 URL로 영구 리다이렉트" "$BASE/gunghap/r/horse/tiger" 301
+check_redirect_location "역순 궁합 URL 정규화" "$BASE/gunghap/r/horse/tiger" "/gunghap/r/tiger/horse"
 check_status "잘못된 띠 파라미터 → 폼 리다이렉트" "$BASE/gunghap/r/xxx/yyy" 302
 
 echo ""
