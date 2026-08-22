@@ -18,10 +18,10 @@ const {
 } = require('../lib/fortune');
 
 const SITE_NAME = '요즘테스트';
-const SITE_URL = process.env.SITE_URL || 'https://example.onrender.com'; // 배포 후 실제 도메인으로 교체하세요
+const SITE_URL = process.env.SITE_URL || 'https://yozeum-test.onrender.com';
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
-const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || ''; // 예: G-XXXXXXXXXX
+const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || 'G-YMN47H27JQ';
 
 const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -88,6 +88,27 @@ ${content}
     </nav>
   </div>
 </footer>
+${GA_MEASUREMENT_ID ? `<script>
+(function () {
+  function track(name, params) {
+    if (typeof window.gtag === 'function') window.gtag('event', name, params || {});
+  }
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    track('tool_submit', {
+      tool_path: form.getAttribute('action') || window.location.pathname,
+    });
+  });
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href]');
+    if (!link || link.origin === window.location.origin) return;
+    track('outbound_click', { link_url: link.href });
+  });
+})();
+</script>` : ''}
 </body>
 </html>`;
 }
