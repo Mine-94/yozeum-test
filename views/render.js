@@ -575,7 +575,7 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
     titleHtml: '나의 사주팔자',
     bodyHtml,
     ogUrl: shareUrl,
-    ogTitle: `나의 사주팔자 — 일간 ${dayStemKo}(${stemInfo.symbol}) - ${SITE_NAME}`,
+    ogTitle: `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}(${stemInfo.symbol}) - ${SITE_NAME}`,
     description: `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}, ${stemInfo.symbol}. 오행 분포와 간이 풀이를 확인해보세요.`,
     backHref: '/saju',
     backLabel: '다시 계산하기',
