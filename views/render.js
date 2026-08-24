@@ -130,9 +130,6 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
       ${formHtml}
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
 
     ${extraHtml || ''}
   </main>`;
@@ -176,9 +173,6 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
       </div>
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
 
     ${extraHtml || ''}
 
@@ -232,9 +226,6 @@ function renderHome(quizzes, fortuneTools) {
     </div>
   </header>
 
-  <div class="ad-slot ad-slot-top container">
-    <div class="ad-placeholder">광고 영역 (상단)</div>
-  </div>
 
   <main class="container">
     <section class="content-section">
@@ -247,9 +238,6 @@ function renderHome(quizzes, fortuneTools) {
       <div class="quiz-grid">${quizCards}</div>
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
   </main>`;
 
   return baseLayout({
@@ -295,9 +283,6 @@ function renderQuizPage(quiz) {
       </div>
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
   </main>
 
   <script>window.__QUIZ__ = ${JSON.stringify(quiz)};</script>
@@ -339,9 +324,6 @@ function renderResultPage(quiz, resultKey) {
       </div>
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
 
     <section class="info-card">
       <h2>다른 테스트도 해보세요</h2>
@@ -696,9 +678,6 @@ function renderUnseHome() {
       ${cards}
     </section>
 
-    <div class="ad-slot ad-slot-bottom">
-      <div class="ad-placeholder">광고 영역 (하단)</div>
-    </div>
 
     ${findFormHtml}
   </main>`;
