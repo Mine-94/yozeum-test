@@ -107,6 +107,17 @@ check_status "다른 퀴즈(vibe-shift)도 점수 결합 정상 동작" "$BASE/q
 check_contains "vibe-shift 결과에도 일치율 표시" "$BASE/q/vibe-shift/r/steady?s=62" "62%"
 
 echo ""
+echo "=== 신규 트렌드 테스트: 전생/연애 스타일 ==="
+check_status "전생 테스트 페이지" "$BASE/q/past-life" 200
+check_status "전생 테스트 결과 페이지" "$BASE/q/past-life/r/strategist" 200
+check_contains "전생 테스트 결과에 유형명 노출" "$BASE/q/past-life/r/strategist" "궁중 책사형"
+check_status "연애 스타일 테스트 페이지" "$BASE/q/love-style" 200
+check_status "연애 스타일 결과 페이지" "$BASE/q/love-style/r/direct" 200
+check_contains "연애 스타일 결과에 유형명 노출" "$BASE/q/love-style/r/direct" "직진끝판왕형"
+check_status "신규 퀴즈도 일치율 결합 정상 동작" "$BASE/q/past-life/r/mystic?s=73" 200
+check_contains "신규 퀴즈 결과에도 일치율 표시" "$BASE/q/past-life/r/mystic?s=73" "73%"
+
+echo ""
 echo "=== 사주팔자 계산기 ==="
 check_status "사주 폼" "$BASE/saju" 200
 check_contains "사주 폼 H1에 무료 만세력 검색어" "$BASE/saju" "무료 만세력·사주팔자 오행 계산기"
