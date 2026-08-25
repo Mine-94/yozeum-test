@@ -96,7 +96,11 @@ app.get('/q/:id', (req, res) => {
 app.get('/q/:id/r/:resultKey', (req, res) => {
   const quiz = findQuiz(req.params.id);
   if (!quiz || !quiz.results[req.params.resultKey]) return res.redirect('/');
-  res.send(renderResultPage(quiz, req.params.resultKey));
+  // 유형+점수 결합형: 클라이언트에서 계산한 "일치율"(?s=0~100)이 있으면 결과에 함께 표시.
+  // 값이 없거나 유효 범위를 벗어나면 조용히 무시하고 기존과 동일하게 렌더링(캐노니컬 URL은 그대로 유지).
+  const scoreRaw = parseInt(req.query.s, 10);
+  const matchScore = Number.isInteger(scoreRaw) && scoreRaw >= 0 && scoreRaw <= 100 ? scoreRaw : null;
+  res.send(renderResultPage(quiz, req.params.resultKey, matchScore));
 });
 
 // --- 사주팔자 계산기 ---
