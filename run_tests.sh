@@ -92,7 +92,19 @@ check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
 check_status "존재하지 않는 퀴즈 → 홈 리다이렉트" "$BASE/q/nope" 302
 
 echo ""
-echo "=== 사주팔자 계산기 ==="
+echo "=== 유형+점수(일치율) 결합형 결과 ==="
+check_status "점수 파라미터 포함 결과 페이지" "$BASE/q/meta-sensing/r/detective?s=87" 200
+check_contains "점수 파라미터 있으면 일치율 표시" "$BASE/q/meta-sensing/r/detective?s=87" "87%"
+if curl -s "$BASE/q/meta-sensing/r/detective" -o /tmp/yozeum_resp.html && ! grep -q "일치율" /tmp/yozeum_resp.html; then
+  echo "PASS  점수 파라미터 없으면 일치율 블록이 나타나지 않음"
+  pass=$((pass+1))
+else
+  echo "FAIL  점수 파라미터 없는데도 일치율 블록이 나타남"
+  fail=$((fail+1))
+fi
+check_status "범위 밖 점수(999)는 무시하고 정상 렌더링" "$BASE/q/meta-sensing/r/detective?s=999" 200
+check_status "다른 퀴즈(vibe-shift)도 점수 결합 정상 동작" "$BASE/q/vibe-shift/r/steady?s=62" 200
+check_contains "vibe-shift 결과에도 일치율 표시" "$BASE/q/vibe-shift/r/steady?s=62" "62%"
 check_status "사주 폼" "$BASE/saju" 200
 check_contains "사주 폼 H1에 무료 만세력 검색어" "$BASE/saju" "무료 만세력·사주팔자 오행 계산기"
 check_contains "사주 폼 메타 설명에 양력·절기·오행 정보" "$BASE/saju" "무료 만세력과 사주팔자 오행 계산기"
