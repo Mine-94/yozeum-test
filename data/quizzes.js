@@ -406,6 +406,222 @@ const quizzes = [
       },
     },
   },
+  {
+    id: 'past-life',
+    title: '나의 전생은 누구였을까? 테스트',
+    subtitle: '운명·사주 좋아하는 사람들 사이에서 화제인 "전생 테스트" — 선택으로 알아보는 나의 전생 신분',
+    emoji: '📜',
+    themeColor: '#8b5e3c',
+    intro: '먼 옛날, 나는 어떤 삶을 살았을까요? 8개 질문에 직관적으로 답하면 나의 전생 신분을 확인할 수 있어요. 재미로 보는 테스트예요.',
+    questions: [
+      {
+        text: '낯선 마을에 도착했다. 가장 먼저 하는 일은?',
+        options: [
+          { text: '마을의 구조와 정보부터 파악한다', type: 'strategist' },
+          { text: '시장부터 둘러보며 물건 가격을 흥정해본다', type: 'merchant' },
+          { text: '마을 풍경이 예뻐서 그림이나 글로 남기고 싶어진다', type: 'artist' },
+          { text: '마을 어르신께 이 땅의 기운과 사연을 여쭤본다', type: 'mystic' },
+        ],
+      },
+      {
+        text: '중요한 결정을 내려야 할 때 나는?',
+        options: [
+          { text: '여러 정보를 모아 치밀하게 전략을 세운다', type: 'strategist' },
+          { text: '손익을 계산해 가장 이득이 되는 쪽을 고른다', type: 'merchant' },
+          { text: '마음이 이끄는 대로, 직관을 따른다', type: 'artist' },
+          { text: '조용히 눈을 감고 마음속 신호를 기다린다', type: 'mystic' },
+        ],
+      },
+      {
+        text: '친구들 사이에서 나의 역할은?',
+        options: [
+          { text: '상황을 정리하고 다음 수를 알려주는 사람', type: 'strategist' },
+          { text: '필요한 걸 구해오고 서로를 연결해주는 사람', type: 'merchant' },
+          { text: '분위기를 즐겁게 만들고 영감을 주는 사람', type: 'artist' },
+          { text: '고민을 들어주고 조언해주는 사람', type: 'mystic' },
+        ],
+      },
+      {
+        text: '갈등이 생겼을 때 나의 대처는?',
+        options: [
+          { text: '원인과 이해관계를 분석해 중재안을 낸다', type: 'strategist' },
+          { text: '서로에게 이득이 되는 타협점을 제안한다', type: 'merchant' },
+          { text: '대화나 글, 그림 등 감정을 표현하는 것으로 풀어낸다', type: 'artist' },
+          { text: '시간을 두고 마음이 가라앉기를 기다린다', type: 'mystic' },
+        ],
+      },
+      {
+        text: '갖고 싶은 능력을 하나만 고른다면?',
+        options: [
+          { text: '미래를 내다보는 통찰력', type: 'strategist' },
+          { text: '무엇이든 원하는 걸 얻어내는 협상력', type: 'merchant' },
+          { text: '사람들의 마음을 움직이는 표현력', type: 'artist' },
+          { text: '보이지 않는 것을 느끼는 직감', type: 'mystic' },
+        ],
+      },
+      {
+        text: '주말에 가장 끌리는 활동은?',
+        options: [
+          { text: '책이나 다큐멘터리로 새로운 지식을 쌓는다', type: 'strategist' },
+          { text: '마켓이나 쇼핑몰을 구경하며 좋은 물건을 찾는다', type: 'merchant' },
+          { text: '전시회나 공연을 보러 간다', type: 'artist' },
+          { text: '혼자 산책하거나 명상하며 시간을 보낸다', type: 'mystic' },
+        ],
+      },
+      {
+        text: '스트레스 받을 때 나는?',
+        options: [
+          { text: '원인을 분석하고 해결 계획을 세운다', type: 'strategist' },
+          { text: '갖고 싶던 걸 사거나 맛있는 걸 먹는다', type: 'merchant' },
+          { text: '음악을 듣거나 뭔가를 만들며 푼다', type: 'artist' },
+          { text: '조용한 곳에서 혼자 시간을 보낸다', type: 'mystic' },
+        ],
+      },
+      {
+        text: '인생에서 가장 중요하게 생각하는 가치는?',
+        options: [
+          { text: '지혜와 통찰', type: 'strategist' },
+          { text: '풍요와 안정', type: 'merchant' },
+          { text: '자유와 표현', type: 'artist' },
+          { text: '균형과 평온', type: 'mystic' },
+        ],
+      },
+    ],
+    results: {
+      strategist: {
+        title: '궁중 책사형',
+        emoji: '🧭',
+        desc: '전생에 왕이나 영주 곁에서 지략을 펼치던 책사였을 가능성이 높아요. 상황을 냉철하게 읽고 최선의 수를 찾는 능력이 지금도 몸에 배어 있어요. 다만 가끔은 계산 없이 마음 가는 대로 움직여보는 것도 필요해요.',
+        shareText: '나의 전생은 궁중 책사형 🧭 — 지략과 통찰로 살아온 삶!',
+      },
+      merchant: {
+        title: '저잣거리 거상형',
+        emoji: '💰',
+        desc: '전생에 큰 장사를 하던 거상이었을 가능성이 높아요. 사람과 물건, 기회를 알아보는 감각이 뛰어나고, 손해 보는 걸 싫어하는 실속파예요. 지금도 실리를 챙기는 판단력이 남달라요.',
+        shareText: '나의 전생은 저잣거리 거상형 💰 — 실속과 감각으로 살아온 삶!',
+      },
+      artist: {
+        title: '방랑 예인형',
+        emoji: '🎨',
+        desc: '전생에 이곳저곳을 떠돌며 그림과 소리로 사람들을 울리고 웃기던 예인이었을 가능성이 높아요. 감정을 표현하는 데 거침이 없고, 자유로운 영혼의 소유자예요. 틀에 갇히는 걸 가장 싫어해요.',
+        shareText: '나의 전생은 방랑 예인형 🎨 — 자유와 표현으로 살아온 삶!',
+      },
+      mystic: {
+        title: '산속 도인형',
+        emoji: '🌙',
+        desc: '전생에 속세를 떠나 산속에서 도를 닦던 도인이었을 가능성이 높아요. 눈에 보이지 않는 흐름을 잘 느끼고, 소란보다 고요를 편안해해요. 지금도 혼자만의 시간에서 힘을 얻는 편이에요.',
+        shareText: '나의 전생은 산속 도인형 🌙 — 고요와 직감으로 살아온 삶!',
+      },
+    },
+  },
+  {
+    id: 'love-style',
+    title: '나의 연애 스타일 테스트',
+    subtitle: '연애할 때 드러나는 진짜 내 모습은? 요즘 화제인 연애 유형 테스트 (공식 심리검사 아닌 재미용)',
+    emoji: '💘',
+    themeColor: '#e84393',
+    intro: '연애를 시작할 때, 좋아하는 사람 앞에서, 다투고 난 뒤 — 상황별 선택으로 나의 진짜 연애 스타일을 확인해보세요. 8개 질문이면 충분해요.',
+    questions: [
+      {
+        text: '좋아하는 사람이 생기면 나는?',
+        options: [
+          { text: '마음을 숨기지 못하고 바로 티가 난다', type: 'direct' },
+          { text: '상대방 마음을 먼저 파악하려 관찰한다', type: 'careful' },
+          { text: '어떻게 하면 잘해줄 수 있을지부터 고민한다', type: 'devoted' },
+          { text: '좋아하지만 내 일상 페이스는 그대로 유지한다', type: 'independent' },
+        ],
+      },
+      {
+        text: '연애 초반, 연락 빈도는?',
+        options: [
+          { text: '하루 종일 실시간으로 연락한다', type: 'direct' },
+          { text: '상대 스타일에 맞춰서 천천히 늘려간다', type: 'careful' },
+          { text: '내가 먼저 자주 연락하는 편이다', type: 'devoted' },
+          { text: '필요할 때만, 무리해서 자주 하진 않는다', type: 'independent' },
+        ],
+      },
+      {
+        text: '데이트 코스를 정할 때?',
+        options: [
+          { text: '내가 원하는 곳으로 적극적으로 이끈다', type: 'direct' },
+          { text: '상대가 좋아할 만한 곳을 미리 조사해둔다', type: 'careful' },
+          { text: '상대가 원하는 대로 다 맞춰준다', type: 'devoted' },
+          { text: '각자 좋아하는 걸 번갈아 하자고 제안한다', type: 'independent' },
+        ],
+      },
+      {
+        text: '다툼이 생겼을 때?',
+        options: [
+          { text: '바로 대화로 풀자고 먼저 다가간다', type: 'direct' },
+          { text: '상대가 진정할 시간을 준 뒤 접근한다', type: 'careful' },
+          { text: '내가 뭘 잘못했는지부터 되돌아본다', type: 'devoted' },
+          { text: '각자 시간을 갖고 감정이 정리되면 얘기한다', type: 'independent' },
+        ],
+      },
+      {
+        text: '상대의 친구들을 만날 때?',
+        options: [
+          { text: '먼저 나서서 친해지려 한다', type: 'direct' },
+          { text: '조심스럽게 분위기를 살피며 다가간다', type: 'careful' },
+          { text: '상대 친구들에게도 잘 보이려 애쓴다', type: 'devoted' },
+          { text: '자연스럽게, 무리하지 않고 어울린다', type: 'independent' },
+        ],
+      },
+      {
+        text: '연인이 바쁜 시기에 나는?',
+        options: [
+          { text: '서운함을 바로 표현한다', type: 'direct' },
+          { text: '이유가 있겠거니 하고 조용히 기다린다', type: 'careful' },
+          { text: '힘들지 않게 더 많이 챙겨주려 한다', type: 'devoted' },
+          { text: '나도 내 할 일에 집중하며 각자 시간을 보낸다', type: 'independent' },
+        ],
+      },
+      {
+        text: '기념일을 준비할 때?',
+        options: [
+          { text: '큰 이벤트로 화끈하게 표현한다', type: 'direct' },
+          { text: '상대가 예전에 흘렸던 말을 기억해뒀다 챙긴다', type: 'careful' },
+          { text: '내가 가진 걸 아낌없이 다 쏟아붓는다', type: 'devoted' },
+          { text: '소소하지만 부담 없는 선물을 고른다', type: 'independent' },
+        ],
+      },
+      {
+        text: '연애에서 가장 중요하게 생각하는 것은?',
+        options: [
+          { text: '서로에 대한 솔직한 표현', type: 'direct' },
+          { text: '서로를 이해하려는 배려', type: 'careful' },
+          { text: '아낌없이 주는 사랑', type: 'devoted' },
+          { text: '각자의 삶을 존중하는 균형', type: 'independent' },
+        ],
+      },
+    ],
+    results: {
+      direct: {
+        title: '직진끝판왕형',
+        emoji: '🎯',
+        desc: '마음이 생기면 숨기지 않고 바로 표현하는 타입이에요. 눈치 보며 시간을 끄는 것보다 솔직하게 다가가는 쪽이 훨씬 편해요. 그 솔직함 덕분에 상대방도 마음을 빨리 열게 되는 편이에요.',
+        shareText: '나의 연애 스타일은 직진끝판왕형 🎯 — 마음은 숨기지 않는 성격!',
+      },
+      careful: {
+        title: '신중관찰형',
+        emoji: '🔭',
+        desc: '상대방의 마음과 상황을 충분히 살핀 뒤에 움직이는 타입이에요. 성급하게 다가가기보다 상대에게 맞춰가는 배려심이 강점이에요. 다만 너무 재다가 타이밍을 놓치지 않게 조심하세요.',
+        shareText: '나의 연애 스타일은 신중관찰형 🔭 — 배려 있게 다가가는 성격!',
+      },
+      devoted: {
+        title: '올인헌신형',
+        emoji: '💝',
+        desc: '한번 마음을 주면 아낌없이 다 쏟아붓는 타입이에요. 상대를 챙기는 데서 행복을 느끼고, 연애에 진심을 다해요. 나 자신을 챙기는 것도 잊지 않는 게 오래가는 연애의 비결이에요.',
+        shareText: '나의 연애 스타일은 올인헌신형 💝 — 사랑에 진심인 성격!',
+      },
+      independent: {
+        title: '자유로운밸런스형',
+        emoji: '🦋',
+        desc: '연애 중에도 나만의 삶과 페이스를 지키는 타입이에요. 상대에게 의존하기보다 서로의 공간을 존중하는 균형 잡힌 연애를 추구해요. 이런 여유가 오히려 관계를 더 건강하게 만들어줘요.',
+        shareText: '나의 연애 스타일은 자유로운밸런스형 🦋 — 균형 잡힌 연애 스타일!',
+      },
+    },
+  },
 ];
 
 module.exports = quizzes;
