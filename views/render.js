@@ -302,7 +302,7 @@ function renderResultPage(quiz, resultKey, matchScore) {
   const result = quiz.results[resultKey];
   const shareUrl = `${SITE_URL}/q/${quiz.id}/r/${resultKey}`;
   const scoreHtml = Number.isInteger(matchScore)
-      ? `
+    ? `
       <div class="compat-box" style="text-align:center;">
         <p class="result-eyebrow">나의 "${escapeHtml(result.title)}" 일치율</p>
         <p style="font-size:2.2rem;font-weight:800;color:${quiz.themeColor};margin:4px 0;">${matchScore}%</p>
