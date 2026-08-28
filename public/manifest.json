@@ -1,0 +1,16 @@
+{
+  "name": "요즘테스트 - 사주팔자·오늘의 운세·심리테스트",
+  "short_name": "요즘테스트",
+  "description": "무료 사주팔자 계산, 오늘의 띠별 운세, 띠 궁합, 심리테스트 모음",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f6f3",
+  "theme_color": "#3d3a34",
+  "lang": "ko",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
