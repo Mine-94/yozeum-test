@@ -252,7 +252,7 @@ function renderHome(quizzes, fortuneTools) {
   </main>`;
 
   return baseLayout({
-    title: '요즘테스트 - 사주팔자·오늘의 운세·심리테스트 모음',
+    title: '무료 사주팔자·오늘의 운세·심리테스트 모음 - 요즘테스트',
     description: '정식 사주팔자 계산, 오늘의 띠별 운세, 띠 궁합부터 요즘 SNS 화제 심리테스트·밸런스게임까지 한곳에서 무료로.',
     ogUrl: `${SITE_URL}/`,
     structuredData: {
@@ -702,8 +702,8 @@ function renderUnseHome() {
   </main>`;
 
   return baseLayout({
-    title: `${todayShort} 오늘의 띠별 운세 - ${SITE_NAME}`,
-    description: `${todayShort} 오늘의 띠별 운세. ${todayKo} 기준 12띠 총운·애정운·금전운·건강운을 확인해보세요.`,
+    title: `${todayShort} 오늘의 띠별 운세 무료 - ${SITE_NAME}`,
+    description: `${todayShort} 오늘의 띠별 운세 무료로 확인하세요. ${todayKo} 기준 12띠 총운·애정운·금전운·건강운을 확인해보세요.`,
     ogUrl: `${SITE_URL}/unse`,
     themeColor: '#c9622a',
     content,
@@ -801,11 +801,11 @@ function renderGunghapForm({ prefillMy } = {}) {
   return formPageShell({
     accent: '#b0473e',
     emoji: '🤝',
-    title: '띠 궁합 보기',
+    title: '무료 띠 궁합 보기',
     subtitle: '삼합·육합·충 — 실제 지지 이론으로 보는 두 띠의 궁합',
     formHtml,
     ogUrl: `${SITE_URL}/gunghap`,
-    description: '두 띠를 선택하면 삼합·육합·충 등 명리학의 지지 관계 이론으로 궁합을 확인할 수 있어요.',
+    description: '무료로 두 띠를 선택하면 삼합·육합·충 등 명리학의 지지 관계 이론으로 궁합을 확인할 수 있어요.',
   });
 }
 
