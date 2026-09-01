@@ -90,6 +90,7 @@ ${content}
     <p class="disclaimer">본 사이트의 사주·운세·테스트 콘텐츠는 재미를 위한 것이며 공식 심리검사·의학적 진단·전문 명리 상담을 대신하지 않습니다.</p>
     <nav class="footer-nav">
       <a href="/">홈</a>
+      <a href="/guides">읽을거리</a>
       <a href="/about">사이트 소개</a>
       <a href="/privacy.html">개인정보처리방침</a>
       <a href="/terms.html">이용약관</a>
@@ -208,7 +209,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
 }
 
 // --- 홈 ---
-function renderHome(quizzes, fortuneTools) {
+function renderHome(quizzes, fortuneTools, guides) {
   const fortuneCards = fortuneTools
     .map(
       (t) => `
@@ -233,6 +234,18 @@ function renderHome(quizzes, fortuneTools) {
     )
     .join('\n');
 
+  const guideCards = guides
+    .map(
+      (guide) => `
+      <a href="/guides/${guide.slug}" class="guide-card">
+        <span class="guide-card-label">요즘테스트 가이드</span>
+        <h3>${escapeHtml(guide.title)}</h3>
+        <p>${escapeHtml(guide.description)}</p>
+        <span class="quiz-card-cta">읽어보기 →</span>
+      </a>`,
+    )
+    .join('\n');
+
   const content = `
   <header class="site-header">
     <div class="container">
@@ -252,6 +265,11 @@ function renderHome(quizzes, fortuneTools) {
     <section class="content-section">
       <h2 class="section-title">🎯 트렌드 테스트</h2>
       <div class="quiz-grid">${quizCards}</div>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">📖 결과를 더 잘 이해하는 글</h2>
+      <div class="guide-grid">${guideCards}</div>
     </section>
 
     <section class="info-card editorial-guide">
@@ -348,6 +366,154 @@ function renderAboutPage() {
     title: `사이트 소개·계산 방식 - ${SITE_NAME}`,
     description: '요즘테스트의 사주·운세 계산 방식과 심리테스트 채점 기준, 콘텐츠 운영 원칙을 확인하세요.',
     ogUrl: aboutUrl,
+    content,
+    structuredData,
+  });
+}
+
+function renderGuidesHome(guides) {
+  const guidesUrl = `${SITE_URL}/guides`;
+  const cards = guides
+    .map(
+      (guide) => `
+      <a href="/guides/${guide.slug}" class="guide-card">
+        <span class="guide-card-label">읽는 데 약 4분</span>
+        <h2>${escapeHtml(guide.title)}</h2>
+        <p>${escapeHtml(guide.description)}</p>
+        <span class="quiz-card-cta">본문 읽기 →</span>
+      </a>`,
+    )
+    .join('\n');
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: `사주·운세·심리테스트 가이드 - ${SITE_NAME}`,
+      description: '사주 결과와 오행, 띠 궁합, 심리테스트 결과를 이해하는 데 필요한 기본 내용을 정리했습니다.',
+      url: guidesUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: guides.map((guide, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: guide.title,
+          url: `${guidesUrl}/${guide.slug}`,
+        })),
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '읽을거리', item: guidesUrl },
+      ],
+    },
+  ];
+
+  const content = `
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <h1>사주·운세·심리테스트 가이드</h1>
+      <p class="tagline">결과만 보여드리지 않고, 읽는 방법과 한계까지 설명합니다</p>
+    </div>
+  </header>
+
+  <main class="container guide-hub">
+    <p class="guide-hub-intro">사주표의 한자부터 테스트 일치율까지, 결과 화면에서 생기는 궁금증을 하나씩 풀었습니다. 필요한 글부터 골라 읽어보세요.</p>
+    <div class="guide-grid">${cards}</div>
+  </main>`;
+
+  return baseLayout({
+    title: `사주·운세·심리테스트 가이드 - ${SITE_NAME}`,
+    description: '사주팔자와 오행, 띠 궁합, 심리테스트 결과를 제대로 이해하기 위한 읽을거리 모음입니다.',
+    ogUrl: guidesUrl,
+    content,
+    structuredData,
+  });
+}
+
+function renderGuidePage(guide) {
+  const guideUrl = `${SITE_URL}/guides/${guide.slug}`;
+  const sectionHtml = guide.sections
+    .map(
+      (section) => `
+      <section class="guide-section">
+        <h2>${escapeHtml(section.heading)}</h2>
+        ${(section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('\n')}
+        ${
+          section.bullets
+            ? `<ul>${section.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join('')}</ul>`
+            : ''
+        }
+      </section>`,
+    )
+    .join('\n');
+
+  const relatedHtml = guide.related
+    .map((item) => `<a href="${item.href}" class="guide-related-link">${escapeHtml(item.label)} →</a>`)
+    .join('\n');
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: guide.title,
+      description: guide.description,
+      url: guideUrl,
+      mainEntityOfPage: guideUrl,
+      datePublished: '2026-09-01',
+      dateModified: '2026-09-01',
+      inLanguage: 'ko-KR',
+      author: { '@type': 'Organization', name: `${SITE_NAME} 운영자`, url: `${SITE_URL}/about` },
+      publisher: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '읽을거리', item: `${SITE_URL}/guides` },
+        { '@type': 'ListItem', position: 3, name: guide.title, item: guideUrl },
+      ],
+    },
+  ];
+
+  const content = `
+  <header class="site-header article-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <p class="article-category">요즘테스트 가이드</p>
+      <h1>${escapeHtml(guide.title)}</h1>
+      <p class="tagline">${escapeHtml(guide.description)}</p>
+      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 1일 검토</p>
+    </div>
+  </header>
+
+  <main class="container article-page">
+    <article class="article-card">
+      <p class="article-lead">${escapeHtml(guide.summary)}</p>
+      ${sectionHtml}
+      <aside class="guide-takeaway">
+        <strong>핵심만 정리하면</strong>
+        <p>${escapeHtml(guide.takeaway)}</p>
+      </aside>
+    </article>
+
+    <section class="info-card guide-related">
+      <h2>이어서 확인하기</h2>
+      ${relatedHtml}
+    </section>
+  </main>`;
+
+  return baseLayout({
+    title: `${guide.title} - ${SITE_NAME}`,
+    description: guide.description,
+    ogUrl: guideUrl,
     content,
     structuredData,
   });
@@ -1095,6 +1261,8 @@ function renderGunghapResult(myKey, partnerKey, relation) {
 module.exports = {
   renderHome,
   renderAboutPage,
+  renderGuidesHome,
+  renderGuidePage,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,

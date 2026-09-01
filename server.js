@@ -3,10 +3,13 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
+const guides = require('./data/guides');
 const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
   renderAboutPage,
+  renderGuidesHome,
+  renderGuidePage,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,
@@ -56,11 +59,21 @@ function findQuiz(id) {
 
 // --- 홈 ---
 app.get('/', (req, res) => {
-  res.send(renderHome(quizzes, fortuneTools));
+  res.send(renderHome(quizzes, fortuneTools, guides));
 });
 
 app.get('/about', (req, res) => {
   res.send(renderAboutPage());
+});
+
+app.get('/guides', (req, res) => {
+  res.send(renderGuidesHome(guides));
+});
+
+app.get('/guides/:slug', (req, res) => {
+  const guide = guides.find((item) => item.slug === req.params.slug);
+  if (!guide) return res.redirect('/guides');
+  res.send(renderGuidePage(guide));
 });
 
 // --- SEO: robots.txt / sitemap.xml ---
@@ -76,6 +89,8 @@ app.get('/sitemap.xml', (req, res) => {
     '/unse',
     '/gunghap',
     '/about',
+    '/guides',
+    ...guides.map((guide) => `/guides/${guide.slug}`),
     ...quizzes.map((q) => `/q/${q.id}`),
     '/privacy.html',
     '/terms.html',
@@ -84,18 +99,10 @@ app.get('/sitemap.xml', (req, res) => {
   // 오늘의 띠별 운세: /unse/:animal (12개) — 기존 라우트지만 sitemap에서 누락돼 있었음
   const unsePaths = TTI_ORDER.map((a) => `/unse/${a}`);
 
-  // 띠 궁합은 두 띠의 관계가 대칭이므로 정규 조합(중복 없는 78개)만 색인합니다.
-  const gunghapPaths = [];
-  TTI_ORDER.forEach((my, myIndex) => {
-    TTI_ORDER.slice(myIndex).forEach((partner) => {
-      gunghapPaths.push(`/gunghap/r/${my}/${partner}`);
-    });
-  });
-
   // 일간(日干) 랜딩 페이지: /ilgan/:stemKey (10개, "OO목 성격" 등 검색어 타겟)
   const ilganPaths = STEM_ROMAN.map((k) => `/ilgan/${k}`);
 
-  const allPaths = [...staticPaths, ...unsePaths, ...gunghapPaths, ...ilganPaths];
+  const allPaths = [...staticPaths, ...unsePaths, ...ilganPaths];
   const urls = allPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
   res.type('application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
@@ -235,6 +242,7 @@ app.get('/gunghap/r/:my/:partner', (req, res) => {
     return res.redirect(301, `/gunghap/r/${partner}/${my}`);
   }
   const relation = getTtiRelation(my, partner);
+  res.set('X-Robots-Tag', 'noindex, follow');
   res.send(renderGunghapResult(my, partner, relation));
 });
 

@@ -492,3 +492,122 @@ main { padding-bottom: 40px; }
 .about-page .info-card {
   text-align: left;
 }
+
+/* 검색용 양산 페이지가 아닌, 실제 설명 콘텐츠를 위한 읽을거리 레이아웃 */
+.guide-hub {
+  padding-top: 24px;
+  padding-bottom: 28px;
+}
+.guide-hub-intro {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+}
+.guide-grid {
+  display: grid;
+  gap: 14px;
+}
+.guide-card {
+  display: block;
+  padding: 20px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.guide-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+.guide-card-label,
+.article-category,
+.article-meta {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.guide-card h2,
+.guide-card h3 {
+  margin: 6px 0 8px;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+.guide-card p {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.article-header h1 {
+  max-width: 560px;
+  margin: 8px auto;
+  font-size: 1.65rem;
+  line-height: 1.35;
+}
+.article-category {
+  margin: 20px 0 0;
+  font-weight: 700;
+}
+.article-meta {
+  margin: 12px 0 0;
+}
+.article-page {
+  padding-top: 24px;
+  padding-bottom: 20px;
+}
+.article-card {
+  padding: 26px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.article-lead {
+  margin: 0 0 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.75;
+}
+.guide-section {
+  margin: 30px 0;
+}
+.guide-section h2 {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  line-height: 1.45;
+}
+.guide-section p {
+  margin: 0 0 14px;
+}
+.guide-section ul {
+  margin: 12px 0 16px;
+  padding-left: 20px;
+}
+.guide-section li {
+  margin-bottom: 8px;
+}
+.guide-takeaway {
+  margin-top: 30px;
+  padding: 18px;
+  background: #f4f2ed;
+  border-radius: 12px;
+}
+.guide-takeaway p {
+  margin: 6px 0 0;
+}
+.guide-related {
+  text-align: left;
+}
+.guide-related-link {
+  display: block;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.guide-related-link:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .article-card { padding: 20px; }
+  .article-header h1 { font-size: 1.42rem; }
+}

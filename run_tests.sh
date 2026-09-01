@@ -103,6 +103,14 @@ check_contains "홈에 콘텐츠 제작 기준 안내" "$BASE/" "결과는 이�
 check_status "사이트 소개" "$BASE/about" 200
 check_contains "사이트 소개에 채점 기준" "$BASE/about" "심리테스트 채점 기준"
 check_contains "사이트 소개에 AboutPage 구조화데이터" "$BASE/about" '"@type":"AboutPage"'
+check_status "읽을거리 허브" "$BASE/guides" 200
+check_contains "읽을거리 허브에 CollectionPage 구조화데이터" "$BASE/guides" '"@type":"CollectionPage"'
+for guide in saju-first-read five-elements-balance zodiac-compatibility personality-test-results; do
+  check_status "가이드 페이지: $guide" "$BASE/guides/$guide" 200
+  check_contains "가이드 Article 구조화데이터: $guide" "$BASE/guides/$guide" '"@type":"Article"'
+done
+check_contains "사주 가이드에 읽는 순서 설명" "$BASE/guides/saju-first-read" "먼저 ‘일간’을 찾으세요"
+check_contains "심리테스트 가이드에 일치율 설명" "$BASE/guides/personality-test-results" "일치율은 선택 횟수를"
 check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
 check_status "ads.txt" "$BASE/ads.txt" 200
@@ -115,17 +123,25 @@ check_contains "sitemap에 /saju 포함" "$BASE/sitemap.xml" "/saju"
 check_contains "sitemap에 /unse 포함" "$BASE/sitemap.xml" "/unse"
 check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
 check_contains "sitemap에 /about 포함" "$BASE/sitemap.xml" "/about<"
+check_contains "sitemap에 /guides 포함" "$BASE/sitemap.xml" "/guides<"
+check_contains "sitemap에 개별 가이드 포함" "$BASE/sitemap.xml" "/guides/saju-first-read<"
 check_contains "sitemap 공식 도메인" "$BASE/sitemap.xml" "https://yozeum-test.com/"
 check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
-check_contains "sitemap에 /gunghap/r/rat/ox(정규 궁합 조합) 포함" "$BASE/sitemap.xml" "/gunghap/r/rat/ox<"
+if curl -s "$BASE/sitemap.xml" | grep -q "/gunghap/r/"; then
+  echo "FAIL  sitemap에 유사한 궁합 결과 페이지가 남아 있음"
+  fail=$((fail+1))
+else
+  echo "PASS  sitemap에서 78개 궁합 결과 페이지 제외"
+  pass=$((pass+1))
+fi
 check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
 check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/sitemap.xml" "/ilgan/gye<"
 
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((7 + quiz_count + 12 + 78 + 10))
-echo "sitemap내 URL수: $url_count (기대값: 정적7+퀴즈${quiz_count}+운세12+궁합78+일간10=${expected})"
+expected=$((12 + quiz_count + 12 + 10))
+echo "sitemap내 URL수: $url_count (기대값: 정적·가이드12+퀴즈${quiz_count}+운세12+일간10=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -251,6 +267,7 @@ check_contains "자축 육합 관계 판정" "$BASE/gunghap/r/rat/ox" "육합"
 check_contains "신자진 삼합 관계 판정" "$BASE/gunghap/r/rat/dragon" "삼합"
 check_contains "동갑띠 판정" "$BASE/gunghap/r/rat/rat" "동갑띠"
 check_contains "평범한 관계 판정(무관계 쌍)" "$BASE/gunghap/r/rat/tiger" "평범한 관계"
+check_header_contains "궁합 결과 페이지 색인 제외" "$BASE/gunghap/r/rat/tiger" "X-Robots-Tag: noindex, follow"
 check_status "역순 궁합 URL은 정규 URL로 영구 리다이렉트" "$BASE/gunghap/r/horse/tiger" 301
 check_redirect_location "역순 궁합 URL 정규화" "$BASE/gunghap/r/horse/tiger" "/gunghap/r/tiger/horse"
 check_status "잘못된 띠 파라미터 → 폼 리다이렉트" "$BASE/gunghap/r/xxx/yyy" 302
