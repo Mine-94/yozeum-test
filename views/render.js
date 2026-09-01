@@ -18,7 +18,10 @@ const {
 } = require('../lib/fortune');
 
 const SITE_NAME = '요즘테스트';
-const SITE_URL = (process.env.SITE_URL || 'https://yozeum-test.com').replace(/\/+$/, '');
+const OFFICIAL_SITE_URL = 'https://yozeum-test.com';
+const configuredSiteUrl = (process.env.SITE_URL || OFFICIAL_SITE_URL).replace(/\/+$/, '');
+// Render에 예전 기본 주소가 환경변수로 남아 있어도 canonical·sitemap은 공식 도메인을 사용합니다.
+const SITE_URL = configuredSiteUrl === 'https://yozeum-test.onrender.com' ? OFFICIAL_SITE_URL : configuredSiteUrl;
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
 const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || 'G-YMN47H27JQ';
