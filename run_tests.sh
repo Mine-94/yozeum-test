@@ -50,6 +50,35 @@ check_redirect_location() {
   fi
 }
 
+check_valid_jsonld() {
+  local desc="$1" url="$2"
+  curl -s "$url" -o /tmp/yozeum_resp.html
+  node -e '
+    const fs = require("fs");
+    const html = fs.readFileSync("/tmp/yozeum_resp.html", "utf8");
+    const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    if (!m) { console.error("NO_MATCH"); process.exit(1); }
+    try {
+      const data = JSON.parse(m[1]);
+      if (!Array.isArray(data) || data.length < 2) { console.error("UNEXPECTED_SHAPE"); process.exit(1); }
+      const hasWebPage = data.some((d) => d["@type"] === "WebPage");
+      const hasBreadcrumb = data.some((d) => d["@type"] === "BreadcrumbList");
+      if (!hasWebPage || !hasBreadcrumb) { console.error("MISSING_TYPE"); process.exit(1); }
+      process.exit(0);
+    } catch (e) {
+      console.error("PARSE_ERROR: " + e.message);
+      process.exit(1);
+    }
+  ' 2>/tmp/yozeum_jsonld_err.txt
+  if [ $? -eq 0 ]; then
+    echo "PASS  valid JSON-LD (WebPage+BreadcrumbList): $desc"
+    pass=$((pass+1))
+  else
+    echo "FAIL  invalid JSON-LD ($(cat /tmp/yozeum_jsonld_err.txt)): $desc ($url)"
+    fail=$((fail+1))
+  fi
+}
+
 echo ""
 echo "=== 기본 페이지 ==="
 check_status "홈" "$BASE/" 200
@@ -116,6 +145,29 @@ check_status "연애 스타일 결과 페이지" "$BASE/q/love-style/r/direct" 2
 check_contains "연애 스타일 결과에 유형명 노출" "$BASE/q/love-style/r/direct" "직진끝판왕형"
 check_status "신규 퀴즈도 일치율 결합 정상 동작" "$BASE/q/past-life/r/mystic?s=73" 200
 check_contains "신규 퀴즈 결과에도 일치율 표시" "$BASE/q/past-life/r/mystic?s=73" "73%"
+
+echo ""
+echo "=== 신규: 테토 에겐 유형 테스트 ==="
+check_status "테토 에겐 테스트 페이지" "$BASE/q/teto-egen" 200
+check_contains "홈에 테토 에겐 카드 노출" "$BASE/" "테토 에겐 유형 테스트"
+check_status "결과(테토형)" "$BASE/q/teto-egen/r/teto" 200
+check_contains "테토형 결과에 유형명 노출" "$BASE/q/teto-egen/r/teto" "테토형"
+check_status "결과(에겐형)" "$BASE/q/teto-egen/r/egen" 200
+check_contains "에겐형 결과에 유형명 노출" "$BASE/q/teto-egen/r/egen" "에겐형"
+check_status "테토 에겐 결과도 일치율 결합 정상 동작" "$BASE/q/teto-egen/r/teto?s=88" 200
+check_contains "테토 에겐 결과에도 일치율 표시" "$BASE/q/teto-egen/r/teto?s=88" "88%"
+check_contains "sitemap에 /q/teto-egen 포함" "$BASE/sitemap.xml" "/q/teto-egen<"
+
+echo ""
+echo "=== 구조화 데이터(JSON-LD) 확장 — 퀴즈·사주결과·일간·운세·궁합 결과 페이지 ==="
+check_contains "퀴즈 인트로(teto-egen)에 JSON-LD" "$BASE/q/teto-egen" "application/ld+json"
+check_valid_jsonld "퀴즈 인트로(teto-egen)의 JSON-LD 유효성" "$BASE/q/teto-egen"
+check_valid_jsonld "퀴즈 결과(teto-egen/teto)의 JSON-LD 유효성" "$BASE/q/teto-egen/r/teto"
+check_valid_jsonld "기존 퀴즈 결과(meta-sensing/detective)의 JSON-LD 유효성" "$BASE/q/meta-sensing/r/detective"
+check_valid_jsonld "사주 결과의 JSON-LD 유효성" "$BASE/saju/r/1990/5/20/14"
+check_valid_jsonld "일간 랜딩(갑목)의 JSON-LD 유효성" "$BASE/ilgan/gap"
+check_valid_jsonld "오늘의 운세(쥐띠)의 JSON-LD 유효성" "$BASE/unse/rat"
+check_valid_jsonld "띠 궁합 결과의 JSON-LD 유효성" "$BASE/gunghap/r/tiger/horse"
 
 echo ""
 echo "=== 사주팔자 계산기 ==="
