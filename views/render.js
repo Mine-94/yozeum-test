@@ -90,6 +90,7 @@ ${content}
     <p class="disclaimer">본 사이트의 사주·운세·테스트 콘텐츠는 재미를 위한 것이며 공식 심리검사·의학적 진단·전문 명리 상담을 대신하지 않습니다.</p>
     <nav class="footer-nav">
       <a href="/">홈</a>
+      <a href="/mbti">MBTI</a>
       <a href="/guides">읽을거리</a>
       <a href="/about">사이트 소개</a>
       <a href="/privacy.html">개인정보처리방침</a>
@@ -246,6 +247,25 @@ function renderHome(quizzes, fortuneTools, guides) {
     )
     .join('\n');
 
+  const popularCards = [
+    { rank: 1, href: '/unse', emoji: '☀️', title: '오늘의 띠별 운세', text: '오늘의 총운·연애운·재물운을 띠별로 확인해보세요.' },
+    { rank: 2, href: '/mbti/test', emoji: '🧭', title: 'MBTI 성격 테스트', text: '20개 문항으로 네 가지 선호 지표를 차근차근 살펴봅니다.' },
+    { rank: 3, href: '/mbti', emoji: '🧩', title: 'MBTI 16유형 설명', text: '성격·관계·일·스트레스 반응을 유형별로 자세히 읽어보세요.' },
+    { rank: 4, href: '/saju', emoji: '📜', title: '무료 만세력·사주팔자', text: '생년월일로 사주 네 기둥과 오행 분포를 계산합니다.' },
+    { rank: 5, href: '/mbti/compatibility', emoji: '🤝', title: 'MBTI 궁합', text: '두 유형의 공통점과 차이를 네 가지 축으로 비교합니다.' },
+    { rank: 6, href: '/q/teto-egen', emoji: '⚡', title: '테토 에겐 유형 테스트', text: '요즘 화제인 테토·에겐 성향을 가볍게 알아봅니다.' },
+  ]
+    .map(
+      (item) => `
+      <a href="${item.href}" class="popular-card" data-priority-rank="${item.rank}">
+        <span class="popular-rank">${item.rank}</span>
+        <span class="popular-emoji">${item.emoji}</span>
+        <span class="popular-copy"><strong>${item.title}</strong><small>${item.text}</small></span>
+        <span class="popular-arrow">→</span>
+      </a>`,
+    )
+    .join('\n');
+
   const content = `
   <header class="site-header">
     <div class="container">
@@ -257,6 +277,14 @@ function renderHome(quizzes, fortuneTools, guides) {
 
 
   <main class="container">
+    <section class="content-section popular-section">
+      <div class="section-heading-row">
+        <h2 class="section-title">지금 많이 찾는 콘텐츠</h2>
+        <span class="section-note">검색 수요를 반영한 순서</span>
+      </div>
+      <div class="popular-grid">${popularCards}</div>
+    </section>
+
     <section class="content-section">
       <h2 class="section-title">🔮 사주·운세</h2>
       <div class="quiz-grid">${fortuneCards}</div>
@@ -516,6 +544,308 @@ function renderGuidePage(guide) {
     ogUrl: guideUrl,
     content,
     structuredData,
+  });
+}
+
+// --- MBTI 성격 유형 ---
+const MBTI_NOTICE = 'MBTI®는 The Myers-Briggs Company의 상표입니다. 이 페이지는 공식 MBTI 검사나 전문 심리 평가가 아니며, 4가지 선호 지표를 참고한 자기이해용 콘텐츠입니다.';
+
+function mbtiBreadcrumb(items) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
+function renderMbtiHome(types, axisInfo) {
+  const pageUrl = `${SITE_URL}/mbti`;
+  const typeCards = Object.entries(types)
+    .map(
+      ([code, type]) => `
+      <a href="/mbti/type/${code}" class="mbti-type-card">
+        <span class="mbti-code">${code}</span>
+        <strong>${escapeHtml(type.name)}</strong>
+        <p>${escapeHtml(type.tagline)}</p>
+        <span>자세히 보기 →</span>
+      </a>`,
+    )
+    .join('\n');
+  const axes = axisInfo
+    .map(
+      (axis) => `
+      <article class="mbti-axis-card">
+        <span>${axis.left} ↔ ${axis.right}</span>
+        <h3>${escapeHtml(axis.title)}</h3>
+        <p>${escapeHtml(axis.description)}</p>
+      </article>`,
+    )
+    .join('\n');
+
+  const content = `
+  <header class="site-header mbti-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <p class="article-category">성격 유형 가이드</p>
+      <h1>MBTI 16유형 성격·연애·직업 설명</h1>
+      <p class="tagline">네 글자만 확인하고 끝내지 말고, 내가 편하게 쓰는 방식과 놓치기 쉬운 부분까지 읽어보세요</p>
+      <div class="mbti-hero-actions">
+        <a href="/mbti/test" class="quiz-btn">20문항 테스트 시작하기</a>
+        <a href="/mbti/compatibility" class="quiz-btn quiz-btn-outline">두 유형 궁합 보기</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mbti-hub">
+    <section class="info-card mbti-intro-card">
+      <h2>MBTI 네 글자는 무엇을 뜻하나요?</h2>
+      <p>MBTI 유형은 에너지 방향, 정보 인식, 판단 기준, 생활 방식에서 어느 쪽을 상대적으로 편하게 쓰는지 네 글자로 표현합니다. 사람을 네 글자에 가두는 분류가 아니라, 익숙한 반응을 돌아보기 위한 하나의 언어에 가깝습니다.</p>
+      <div class="mbti-axis-grid">${axes}</div>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">16가지 유형 자세히 보기</h2>
+      <div class="mbti-type-grid">${typeCards}</div>
+    </section>
+
+    <section class="info-card mbti-notice">
+      <h2>읽기 전에 확인해주세요</h2>
+      <p>${MBTI_NOTICE}</p>
+      <p>같은 유형이어도 경험과 환경에 따라 모습은 달라집니다. 유형 설명은 나와 타인을 단정하는 근거보다 대화를 시작하는 질문으로 활용해주세요.</p>
+    </section>
+  </main>`;
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: `MBTI 16유형 성격·연애·직업 설명 - ${SITE_NAME}`,
+      description: 'MBTI 16가지 유형의 성격, 강점, 관계, 일, 스트레스 반응과 성장 방향을 자세히 설명합니다.',
+      url: pageUrl,
+      inLanguage: 'ko-KR',
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: 16,
+        itemListElement: Object.entries(types).map(([code, type], index) => ({
+          '@type': 'ListItem', position: index + 1, name: `${code} ${type.name}`, url: `${pageUrl}/type/${code}`,
+        })),
+      },
+    },
+    mbtiBreadcrumb([
+      { name: '홈', url: `${SITE_URL}/` },
+      { name: 'MBTI 16유형', url: pageUrl },
+    ]),
+  ];
+
+  return baseLayout({
+    title: `MBTI 16유형 성격·연애·직업 상세 설명 - ${SITE_NAME}`,
+    description: 'MBTI 16가지 유형의 성격과 강점, 연애·관계 방식, 잘 맞는 업무 환경, 스트레스 반응과 성장 방향을 자세히 확인하세요.',
+    ogUrl: pageUrl,
+    themeColor: '#6657c7',
+    content,
+    structuredData,
+  });
+}
+
+function renderMbtiTest(questions, axisInfo) {
+  const pageUrl = `${SITE_URL}/mbti/test`;
+  const axisList = axisInfo
+    .map((axis) => `<li><strong>${axis.left}/${axis.right} ${escapeHtml(axis.title)}</strong> — ${escapeHtml(axis.description)}</li>`)
+    .join('');
+  const safeQuestions = JSON.stringify(questions).replace(/</g, '\\u003c');
+  const content = `
+  <header class="site-header quiz-header mbti-header" style="--accent:#6657c7">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <div class="quiz-hero-badge">🧭</div>
+      <h1>MBTI 성격 유형 테스트</h1>
+      <p class="tagline">일상에서 더 자주 보이는 반응을 골라 네 가지 선호 지표를 살펴보세요</p>
+    </div>
+  </header>
+  <main class="container">
+    <section class="tool-card mbti-test-card" style="--accent:#6657c7">
+      <div id="mbti-intro">
+        <p class="result-eyebrow">총 20개 문항 · 약 3분</p>
+        <h2>지금의 나와 가까운 답을 골라주세요</h2>
+        <p class="result-desc">되고 싶은 모습보다 평소 자연스럽게 하는 행동을 고르면 결과를 이해하는 데 도움이 됩니다. 정답이나 좋은 유형은 없습니다.</p>
+        <button type="button" id="mbti-start" class="quiz-btn">테스트 시작하기</button>
+      </div>
+      <div id="mbti-play" hidden>
+        <div class="mbti-progress-meta"><span id="mbti-count">1 / 20</span><span>한 문항씩 선택</span></div>
+        <div class="progress-track"><div id="mbti-progress" class="progress-fill"></div></div>
+        <h2 id="mbti-question" class="mbti-question"></h2>
+        <div class="mbti-answer-grid">
+          <button type="button" id="mbti-left" class="answer-btn"></button>
+          <button type="button" id="mbti-right" class="answer-btn"></button>
+        </div>
+      </div>
+    </section>
+    <section class="info-card mbti-test-guide">
+      <h2>결과는 이렇게 계산합니다</h2>
+      <p>각 축마다 5개 질문을 두고 선택한 횟수가 많은 글자를 결과에 반영합니다. 네 축을 합치면 ISTJ, ENFP처럼 하나의 유형이 됩니다.</p>
+      <ul>${axisList}</ul>
+      <p class="disclaimer">${MBTI_NOTICE}</p>
+    </section>
+  </main>
+  <script>window.__MBTI_QUESTIONS__=${safeQuestions};</script>
+  <script src="/js/mbti-test.js"></script>`;
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org', '@type': 'WebPage', name: `MBTI 성격 유형 테스트 - ${SITE_NAME}`,
+      description: '20개 문항으로 네 가지 MBTI 선호 지표를 살펴보는 무료 자기이해용 테스트입니다.', url: pageUrl, inLanguage: 'ko-KR',
+    },
+    mbtiBreadcrumb([
+      { name: '홈', url: `${SITE_URL}/` }, { name: 'MBTI 16유형', url: `${SITE_URL}/mbti` }, { name: 'MBTI 테스트', url: pageUrl },
+    ]),
+  ];
+  return baseLayout({
+    title: `무료 MBTI 성격 유형 테스트 20문항 - ${SITE_NAME}`,
+    description: '일상 행동을 묻는 20개 문항으로 E/I, S/N, T/F, J/P 선호를 확인하고 16가지 MBTI 유형 설명까지 읽어보세요.',
+    ogUrl: pageUrl, themeColor: '#6657c7', content, structuredData,
+  });
+}
+
+function renderMbtiType(typeCode, type, breakdown) {
+  const pageUrl = `${SITE_URL}/mbti/type/${typeCode}`;
+  const list = (items) => `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const breakdownHtml = breakdown
+    ? `<section class="mbti-breakdown">
+        <h2>내 선택 비율</h2>
+        <p>각 축의 5개 답변을 백분율로 바꾼 값입니다. 수치가 비슷하면 상황에 따라 양쪽 특성을 모두 사용할 수 있어요.</p>
+        ${breakdown.map((axis) => `
+          <div class="mbti-bar-row">
+            <div class="mbti-bar-labels"><strong>${axis.left} ${axis.leftValue}%</strong><span>${escapeHtml(axis.title)}</span><strong>${axis.rightValue}% ${axis.right}</strong></div>
+            <div class="mbti-bar"><span style="width:${axis.leftValue}%"></span></div>
+          </div>`).join('')}
+      </section>`
+    : '';
+  const content = `
+  <header class="site-header mbti-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <p class="article-category">MBTI 16유형</p>
+      <p class="mbti-type-hero-code">${typeCode}</p>
+      <h1>${typeCode} ${escapeHtml(type.name)}</h1>
+      <p class="tagline">${escapeHtml(type.tagline)}</p>
+    </div>
+  </header>
+  <main class="container mbti-type-page">
+    <article class="article-card">
+      <p class="article-lead">${escapeHtml(type.summary)}</p>
+      ${breakdownHtml}
+      <div class="mbti-detail-grid">
+        <section><h2>잘하는 것</h2>${list(type.strengths)}</section>
+        <section><h2>놓치기 쉬운 부분</h2>${list(type.blindSpots)}</section>
+      </div>
+      <section class="guide-section"><h2>연애와 인간관계</h2><p>${escapeHtml(type.relationships)}</p></section>
+      <section class="guide-section"><h2>일할 때 강점과 어울리는 환경</h2><p>${escapeHtml(type.work)}</p></section>
+      <section class="guide-section"><h2>스트레스를 받을 때</h2><p>${escapeHtml(type.stress)}</p></section>
+      <aside class="guide-takeaway"><strong>성장을 위한 한 가지 제안</strong><p>${escapeHtml(type.growth)}</p></aside>
+    </article>
+    <section class="info-card mbti-next-actions">
+      <h2>이어서 살펴보기</h2>
+      <a href="/mbti/compatibility?first=${typeCode}">이 유형과 다른 유형의 궁합 비교하기 →</a>
+      <a href="/mbti/test">20문항 테스트 다시 해보기 →</a>
+      <a href="/mbti">16유형 전체 보기 →</a>
+    </section>
+    <section class="info-card mbti-notice"><h2>유형보다 사람이 먼저입니다</h2><p>${MBTI_NOTICE}</p><p>유형은 선호 경향을 설명할 뿐 능력, 성숙도, 관계의 성공 여부를 결정하지 않습니다.</p></section>
+  </main>`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org', '@type': 'Article', headline: `${typeCode} ${type.name}: 성격·연애·직업 상세 설명`,
+      description: type.summary, url: pageUrl, mainEntityOfPage: pageUrl, inLanguage: 'ko-KR',
+      datePublished: '2026-09-01', dateModified: '2026-09-01',
+      author: { '@type': 'Organization', name: `${SITE_NAME} 운영자`, url: `${SITE_URL}/about` },
+      publisher: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    mbtiBreadcrumb([
+      { name: '홈', url: `${SITE_URL}/` }, { name: 'MBTI 16유형', url: `${SITE_URL}/mbti` }, { name: typeCode, url: pageUrl },
+    ]),
+  ];
+  return baseLayout({
+    title: `${typeCode} 특징·연애·직업·장단점 상세 설명 - ${SITE_NAME}`,
+    description: `${typeCode} ${type.name}의 성격 특징, 강점과 약점, 연애·인간관계, 잘 맞는 업무 환경, 스트레스 반응과 성장 방향을 자세히 설명합니다.`,
+    ogUrl: pageUrl, themeColor: '#6657c7', content, structuredData,
+  });
+}
+
+function renderMbtiCompatibilityForm(types, prefillFirst) {
+  const pageUrl = `${SITE_URL}/mbti/compatibility`;
+  const options = (selected) => Object.entries(types)
+    .map(([code, type]) => `<option value="${code}"${selected === code ? ' selected' : ''}>${code} · ${escapeHtml(type.name)}</option>`)
+    .join('');
+  const formHtml = `
+    <form action="/mbti/compatibility/result" method="GET">
+      <div class="mbti-compare-selects">
+        <label>첫 번째 유형<select name="first" required><option value="">유형 선택</option>${options(prefillFirst)}</select></label>
+        <span class="mbti-compare-mark">×</span>
+        <label>두 번째 유형<select name="second" required><option value="">유형 선택</option>${options()}</select></label>
+      </div>
+      <button type="submit" class="quiz-btn">두 유형 비교하기</button>
+    </form>`;
+  const extraHtml = `
+    <section class="info-card mbti-compat-guide">
+      <h2>MBTI 궁합은 어떻게 보나요?</h2>
+      <p>좋고 나쁜 조합을 단정하는 대신 네 가지 축에서 대화 방식이 어디서 편하고, 어디서 엇갈릴 수 있는지 비교합니다. 같은 글자는 익숙함을, 다른 글자는 새로운 관점을 줄 수 있습니다.</p>
+      <p>관계의 만족도는 유형보다 의사소통, 경험, 가치관, 갈등을 다루는 방식의 영향을 더 많이 받습니다. 결과는 상대를 판단하는 점수가 아니라 대화할 주제를 찾는 데 활용해주세요.</p>
+      <p class="disclaimer">${MBTI_NOTICE}</p>
+    </section>`;
+  const structuredData = [
+    { '@context': 'https://schema.org', '@type': 'WebPage', name: `MBTI 궁합 비교 - ${SITE_NAME}`, description: '두 MBTI 유형의 공통점과 차이를 네 가지 선호 지표로 비교합니다.', url: pageUrl, inLanguage: 'ko-KR' },
+    mbtiBreadcrumb([{ name: '홈', url: `${SITE_URL}/` }, { name: 'MBTI 16유형', url: `${SITE_URL}/mbti` }, { name: 'MBTI 궁합', url: pageUrl }]),
+  ];
+  return formPageShell({
+    accent: '#6657c7', emoji: '🤝', title: 'MBTI 궁합 비교', subtitle: '두 유형의 공통점과 차이를 네 가지 축으로 살펴보세요',
+    formHtml, ogUrl: pageUrl, description: '두 MBTI 유형을 선택하면 E/I, S/N, T/F, J/P 축별 관계 방식과 대화 포인트를 비교해드립니다.',
+    structuredData, extraHtml,
+  });
+}
+
+function mbtiAxisComparison(firstCode, secondCode) {
+  const definitions = [
+    { index: 0, title: '에너지와 대화 속도', same: { E: '둘 다 사람과 활동 속에서 생각이 또렷해지는 편이라 대화와 약속이 자연스럽습니다. 다만 쉬지 않고 일정을 채우면 함께 지칠 수 있어요.', I: '둘 다 혼자 정리할 시간을 존중해 편안합니다. 속마음을 미루지 않도록 중요한 이야기는 시간을 정해 꺼내는 편이 좋습니다.' }, mixed: '한 사람은 대화하며 풀고, 다른 사람은 혼자 정리한 뒤 말하기 쉽습니다. 바로 답을 요구하지 말고 다시 이야기할 시간을 합의해보세요.' },
+    { index: 1, title: '정보를 이해하는 방식', same: { S: '구체적인 사실과 현실 조건을 함께 확인해 실용적인 결정을 내리기 쉽습니다. 장기적인 가능성도 가끔 질문하면 선택의 폭이 넓어집니다.', N: '아이디어와 의미를 주고받는 대화가 잘 이어집니다. 기대가 커질수록 일정과 비용 같은 현실 조건을 함께 적어보는 것이 좋습니다.' }, mixed: '한 사람은 구체적인 사실을, 다른 사람은 전체 의미와 가능성을 먼저 봅니다. 예시와 큰 그림을 한 번씩 번갈아 설명하면 오해가 줄어듭니다.' },
+    { index: 2, title: '판단과 갈등 해결', same: { T: '문제를 논리적으로 정리하고 해결책을 찾는 속도가 비슷합니다. 맞는 결론을 찾기 전에 서로 어떤 기분인지도 확인해주세요.', F: '서로의 감정과 관계에 미칠 영향을 세심하게 살핍니다. 불편함을 피하려고 기준과 결론을 흐리지 않는 것이 중요합니다.' }, mixed: '한 사람은 기준과 해결책을, 다른 사람은 감정과 영향을 먼저 살핍니다. 공감이 필요한지 해결이 필요한지 먼저 묻는 것만으로 대화가 훨씬 편해집니다.' },
+    { index: 3, title: '계획과 생활 리듬', same: { J: '일정과 약속을 미리 정하는 편이라 함께 움직이기 수월합니다. 계획이 바뀔 여지도 조금 남겨두면 부담을 줄일 수 있어요.', P: '상황에 맞춰 즉흥적으로 움직이는 리듬이 잘 맞습니다. 돈·시간·마감처럼 꼭 지켜야 하는 약속만큼은 미리 정해두세요.' }, mixed: '한 사람은 정해진 계획에서, 다른 사람은 열려 있는 선택지에서 편안함을 느낍니다. 반드시 정할 부분과 현장에서 정할 부분을 나눠보세요.' },
+  ];
+  return definitions.map((item) => {
+    const first = firstCode[item.index];
+    const second = secondCode[item.index];
+    return { title: item.title, first, second, same: first === second, text: first === second ? item.same[first] : item.mixed };
+  });
+}
+
+function renderMbtiCompatibilityResult(firstCode, first, secondCode, second) {
+  const pageUrl = `${SITE_URL}/mbti/compatibility/${firstCode}/${secondCode}`;
+  const comparisons = mbtiAxisComparison(firstCode, secondCode);
+  const sameCount = comparisons.filter((item) => item.same).length;
+  const labels = ['정반대의 시선이 만나는 조합', '서로 다른 방식이 선명한 조합', '공통점과 차이가 균형 잡힌 조합', '편안한 공통점이 많은 조합', '매우 비슷한 리듬'];
+  const rows = comparisons.map((item) => `
+    <article class="mbti-compat-row">
+      <div class="mbti-compat-axis"><span>${item.first}</span><strong>${escapeHtml(item.title)}</strong><span>${item.second}</span></div>
+      <p>${escapeHtml(item.text)}</p>
+      <small>${item.same ? '같은 선호' : '다른 선호'}</small>
+    </article>`).join('');
+  const bodyHtml = `
+    <p class="result-desc" style="text-align:center;font-size:1.05rem;">${escapeHtml(first.name)} × ${escapeHtml(second.name)}</p>
+    <div class="compat-box mbti-compat-summary"><p class="result-eyebrow">네 축 중 ${sameCount}개가 같은 조합</p><h2>${labels[sameCount]}</h2><p>같은 글자가 많다고 더 좋은 궁합은 아닙니다. 편한 부분과 조율이 필요한 부분을 구분해보세요.</p></div>
+    <div class="mbti-compat-rows">${rows}</div>
+    <p class="disclaimer" style="text-align:left;margin-top:18px;">이 결과는 관계의 성공 가능성을 예측하거나 점수화하지 않습니다. 실제 관계는 대화 습관, 가치관, 경험과 서로를 존중하는 태도에 따라 달라집니다.</p>`;
+  const structuredData = [
+    { '@context': 'https://schema.org', '@type': 'WebPage', name: `${firstCode}와 ${secondCode} MBTI 궁합`, description: `${firstCode}와 ${secondCode}의 공통점과 차이를 네 가지 선호 지표로 비교한 자기이해용 콘텐츠입니다.`, url: pageUrl, inLanguage: 'ko-KR' },
+    mbtiBreadcrumb([{ name: '홈', url: `${SITE_URL}/` }, { name: 'MBTI 궁합', url: `${SITE_URL}/mbti/compatibility` }, { name: `${firstCode} × ${secondCode}`, url: pageUrl }]),
+  ];
+  return resultPageShell({
+    accent: '#6657c7', eyebrow: 'MBTI 궁합 비교', emoji: '🤝', titleHtml: `${firstCode} × ${secondCode}`,
+    bodyHtml, ogUrl: pageUrl, ogTitle: `${firstCode} ${secondCode} MBTI 궁합·관계 특징 - ${SITE_NAME}`,
+    description: `${firstCode}와 ${secondCode}의 대화, 정보 이해, 갈등 해결, 생활 리듬을 네 가지 MBTI 축으로 비교합니다.`,
+    backHref: '/mbti/compatibility', backLabel: '다른 유형 비교하기', structuredData,
   });
 }
 
@@ -1263,6 +1593,11 @@ module.exports = {
   renderAboutPage,
   renderGuidesHome,
   renderGuidePage,
+  renderMbtiHome,
+  renderMbtiTest,
+  renderMbtiType,
+  renderMbtiCompatibilityForm,
+  renderMbtiCompatibilityResult,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,

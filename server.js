@@ -4,12 +4,18 @@ const rateLimit = require('express-rate-limit');
 const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
 const guides = require('./data/guides');
+const { questions: mbtiQuestions, types: mbtiTypes, axisInfo: mbtiAxisInfo } = require('./data/mbti');
 const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
   renderAboutPage,
   renderGuidesHome,
   renderGuidePage,
+  renderMbtiHome,
+  renderMbtiTest,
+  renderMbtiType,
+  renderMbtiCompatibilityForm,
+  renderMbtiCompatibilityResult,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,
@@ -90,7 +96,11 @@ app.get('/sitemap.xml', (req, res) => {
     '/gunghap',
     '/about',
     '/guides',
+    '/mbti',
+    '/mbti/test',
+    '/mbti/compatibility',
     ...guides.map((guide) => `/guides/${guide.slug}`),
+    ...Object.keys(mbtiTypes).map((type) => `/mbti/type/${type}`),
     ...quizzes.map((q) => `/q/${q.id}`),
     '/privacy.html',
     '/terms.html',
@@ -106,6 +116,58 @@ app.get('/sitemap.xml', (req, res) => {
   const urls = allPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
   res.type('application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
+});
+
+// --- MBTI 16유형·테스트·궁합 ---
+app.get('/mbti', (req, res) => {
+  res.send(renderMbtiHome(mbtiTypes, mbtiAxisInfo));
+});
+
+app.get('/mbti/test', (req, res) => {
+  res.send(renderMbtiTest(mbtiQuestions, mbtiAxisInfo));
+});
+
+app.get('/mbti/type/:type', (req, res) => {
+  const typeCode = String(req.params.type || '').toUpperCase();
+  if (!mbtiTypes[typeCode]) return res.redirect('/mbti');
+  if (req.params.type !== typeCode) return res.redirect(301, `/mbti/type/${typeCode}`);
+
+  const values = ['ei', 'sn', 'tf', 'jp'].map((key) => parseInt(req.query[key], 10));
+  const validBreakdown = values.every((value) => Number.isInteger(value) && value >= 0 && value <= 100);
+  const breakdown = validBreakdown
+    ? [
+        { title: '에너지 방향', left: 'E', right: 'I', leftValue: values[0], rightValue: 100 - values[0] },
+        { title: '정보 인식', left: 'S', right: 'N', leftValue: values[1], rightValue: 100 - values[1] },
+        { title: '판단 기준', left: 'T', right: 'F', leftValue: values[2], rightValue: 100 - values[2] },
+        { title: '생활 방식', left: 'J', right: 'P', leftValue: values[3], rightValue: 100 - values[3] },
+      ]
+    : null;
+  res.send(renderMbtiType(typeCode, mbtiTypes[typeCode], breakdown));
+});
+
+app.get('/mbti/compatibility', (req, res) => {
+  const first = mbtiTypes[String(req.query.first || '').toUpperCase()] ? String(req.query.first).toUpperCase() : null;
+  res.send(renderMbtiCompatibilityForm(mbtiTypes, first));
+});
+
+app.get('/mbti/compatibility/result', (req, res) => {
+  const first = String(req.query.first || '').toUpperCase();
+  const second = String(req.query.second || '').toUpperCase();
+  if (!mbtiTypes[first] || !mbtiTypes[second]) return res.redirect('/mbti/compatibility');
+  const pair = [first, second].sort();
+  res.redirect(`/mbti/compatibility/${pair[0]}/${pair[1]}`);
+});
+
+app.get('/mbti/compatibility/:first/:second', (req, res) => {
+  const first = String(req.params.first || '').toUpperCase();
+  const second = String(req.params.second || '').toUpperCase();
+  if (!mbtiTypes[first] || !mbtiTypes[second]) return res.redirect('/mbti/compatibility');
+  const pair = [first, second].sort();
+  if (req.params.first !== pair[0] || req.params.second !== pair[1]) {
+    return res.redirect(301, `/mbti/compatibility/${pair[0]}/${pair[1]}`);
+  }
+  res.set('X-Robots-Tag', 'noindex, follow');
+  res.send(renderMbtiCompatibilityResult(pair[0], mbtiTypes[pair[0]], pair[1], mbtiTypes[pair[1]]));
 });
 
 // --- 트렌드 테스트 (기존, 선택식 퀴즈) ---

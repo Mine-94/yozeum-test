@@ -100,6 +100,16 @@ check_contains "홈에 트렌드 테스트 섹션" "$BASE/" "트렌드 테스트
 check_contains "홈에 검색용 H1" "$BASE/" "<h1 class=\"home-title\">무료 사주·운세·심리테스트</h1>"
 check_contains "홈에 WebSite 구조화데이터" "$BASE/" '"@type":"WebSite"'
 check_contains "홈에 콘텐츠 제작 기준 안내" "$BASE/" "결과는 이렇게 만들어요"
+check_contains "홈에 검색 수요 우선순위 섹션" "$BASE/" "지금 많이 찾는 콘텐츠"
+curl -s "$BASE/" -o /tmp/yozeum_home.html
+priority_order=$(grep -o 'data-priority-rank="[1-6]"' /tmp/yozeum_home.html | tr -cd '1-6')
+if [ "$priority_order" = "123456" ]; then
+  echo "PASS  홈 인기 콘텐츠가 수요 우선순위 1→6으로 배치"
+  pass=$((pass+1))
+else
+  echo "FAIL  홈 인기 콘텐츠 순서 불일치 (got $priority_order)"
+  fail=$((fail+1))
+fi
 check_status "사이트 소개" "$BASE/about" 200
 check_contains "사이트 소개에 채점 기준" "$BASE/about" "심리테스트 채점 기준"
 check_contains "사이트 소개에 AboutPage 구조화데이터" "$BASE/about" '"@type":"AboutPage"'
@@ -125,6 +135,10 @@ check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
 check_contains "sitemap에 /about 포함" "$BASE/sitemap.xml" "/about<"
 check_contains "sitemap에 /guides 포함" "$BASE/sitemap.xml" "/guides<"
 check_contains "sitemap에 개별 가이드 포함" "$BASE/sitemap.xml" "/guides/saju-first-read<"
+check_contains "sitemap에 MBTI 허브 포함" "$BASE/sitemap.xml" "/mbti<"
+check_contains "sitemap에 MBTI 테스트 포함" "$BASE/sitemap.xml" "/mbti/test<"
+check_contains "sitemap에 MBTI 궁합 폼 포함" "$BASE/sitemap.xml" "/mbti/compatibility<"
+check_contains "sitemap에 INFP 유형 포함" "$BASE/sitemap.xml" "/mbti/type/INFP<"
 check_contains "sitemap 공식 도메인" "$BASE/sitemap.xml" "https://yozeum-test.com/"
 check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
 if curl -s "$BASE/sitemap.xml" | grep -q "/gunghap/r/"; then
@@ -134,14 +148,21 @@ else
   echo "PASS  sitemap에서 78개 궁합 결과 페이지 제외"
   pass=$((pass+1))
 fi
+if curl -s "$BASE/sitemap.xml" | grep -q "/mbti/compatibility/.*/"; then
+  echo "FAIL  sitemap에 MBTI 궁합 조합 결과가 남아 있음"
+  fail=$((fail+1))
+else
+  echo "PASS  sitemap에서 MBTI 궁합 조합 결과 제외"
+  pass=$((pass+1))
+fi
 check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
 check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/sitemap.xml" "/ilgan/gye<"
 
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((12 + quiz_count + 12 + 10))
-echo "sitemap내 URL수: $url_count (기대값: 정적·가이드12+퀴즈${quiz_count}+운세12+일간10=${expected})"
+expected=$((31 + quiz_count + 12 + 10))
+echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}+운세12+일간10=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -149,6 +170,37 @@ else
   echo "FAIL  sitemap URL 수 불일치 (got $url_count, expected $expected)"
   fail=$((fail+1))
 fi
+
+echo ""
+echo "=== MBTI 16유형·검사·궁합 ==="
+check_status "MBTI 16유형 허브" "$BASE/mbti" 200
+check_contains "MBTI 허브에 16유형 설명" "$BASE/mbti" "16가지 유형 자세히 보기"
+check_contains "MBTI 허브에 네 축 설명" "$BASE/mbti" "정보를 받아들이는 방식"
+check_contains "MBTI 허브에 공식 검사 아님 안내" "$BASE/mbti" "공식 MBTI 검사나 전문 심리 평가가 아니며"
+check_contains "MBTI 허브 CollectionPage 구조화데이터" "$BASE/mbti" '"@type":"CollectionPage"'
+check_status "MBTI 20문항 테스트" "$BASE/mbti/test" 200
+check_contains "MBTI 테스트 문항 수 안내" "$BASE/mbti/test" "총 20개 문항"
+check_contains "MBTI 테스트 클라이언트 스크립트" "$BASE/mbti/test" "/js/mbti-test.js"
+for type in ISTJ ISFJ INFJ INTJ ISTP ISFP INFP INTP ESTP ESFP ENFP ENTP ESTJ ESFJ ENFJ ENTJ; do
+  check_status "MBTI 유형 페이지: $type" "$BASE/mbti/type/$type" 200
+done
+check_contains "INFP 유형에 성격 설명" "$BASE/mbti/type/INFP" "가치 중심 이상형"
+check_contains "INFP 유형에 연애·관계 설명" "$BASE/mbti/type/INFP" "연애와 인간관계"
+check_contains "INFP 유형에 업무 환경 설명" "$BASE/mbti/type/INFP" "일할 때 강점과 어울리는 환경"
+check_contains "유형 페이지 Article 구조화데이터" "$BASE/mbti/type/INFP" '"@type":"Article"'
+check_status "소문자 MBTI 유형은 정규 URL로 영구 이동" "$BASE/mbti/type/infp" 301
+check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" "/mbti/type/INFP"
+check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "E 20%"
+check_contains "테스트 결과 반대 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "80% I"
+check_status "MBTI 궁합 선택 폼" "$BASE/mbti/compatibility" 200
+check_contains "MBTI 궁합에 점수화하지 않는 원칙" "$BASE/mbti/compatibility" "좋고 나쁜 조합을 단정하는 대신"
+check_redirect_location "MBTI 궁합 계산→정규 결과" "$BASE/mbti/compatibility/result?first=INFP&second=ENFJ" "/mbti/compatibility/ENFJ/INFP"
+check_status "MBTI 궁합 결과" "$BASE/mbti/compatibility/ENFJ/INFP" 200
+check_contains "MBTI 궁합 네 축 비교" "$BASE/mbti/compatibility/ENFJ/INFP" "에너지와 대화 속도"
+check_contains "MBTI 궁합은 예측·점수화하지 않음" "$BASE/mbti/compatibility/ENFJ/INFP" "성공 가능성을 예측하거나 점수화하지 않습니다"
+check_header_contains "MBTI 궁합 조합 결과 색인 제외" "$BASE/mbti/compatibility/ENFJ/INFP" "X-Robots-Tag: noindex, follow"
+check_status "역순 MBTI 궁합 URL은 정규 URL로 영구 이동" "$BASE/mbti/compatibility/INFP/ENFJ" 301
+check_redirect_location "역순 MBTI 궁합 URL 정규화" "$BASE/mbti/compatibility/INFP/ENFJ" "/mbti/compatibility/ENFJ/INFP"
 
 echo ""
 echo "=== 기존 퀴즈 회귀 테스트 ==="
