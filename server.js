@@ -6,6 +6,7 @@ const fortuneTools = require('./data/fortune-tools');
 const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
+  renderAboutPage,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,
@@ -21,6 +22,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADSENSE_PUBLISHER_ID = (process.env.ADSENSE_CLIENT_ID || 'ca-pub-8602848692420724').replace(/^ca-/, '');
+const LEGACY_HOST = 'yozeum-test.onrender.com';
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
@@ -29,6 +31,14 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use(limiter);
+
+// 검색 신호가 Render 기본 주소와 공식 도메인으로 갈라지지 않도록 한 곳으로 모읍니다.
+app.use((req, res, next) => {
+  if (String(req.hostname || '').toLowerCase() === LEGACY_HOST) {
+    return res.redirect(301, `${SITE_URL}${req.originalUrl}`);
+  }
+  next();
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -49,6 +59,10 @@ app.get('/', (req, res) => {
   res.send(renderHome(quizzes, fortuneTools));
 });
 
+app.get('/about', (req, res) => {
+  res.send(renderAboutPage());
+});
+
 // --- SEO: robots.txt / sitemap.xml ---
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -61,6 +75,7 @@ app.get('/sitemap.xml', (req, res) => {
     '/saju',
     '/unse',
     '/gunghap',
+    '/about',
     ...quizzes.map((q) => `/q/${q.id}`),
     '/privacy.html',
     '/terms.html',
@@ -100,6 +115,7 @@ app.get('/q/:id/r/:resultKey', (req, res) => {
   // 값이 없거나 유효 범위를 벗어나면 조용히 무시하고 기존과 동일하게 렌더링(캐노니컬 URL은 그대로 유지).
   const scoreRaw = parseInt(req.query.s, 10);
   const matchScore = Number.isInteger(scoreRaw) && scoreRaw >= 0 && scoreRaw <= 100 ? scoreRaw : null;
+  res.set('X-Robots-Tag', 'noindex, follow');
   res.send(renderResultPage(quiz, req.params.resultKey, matchScore));
 });
 
@@ -161,6 +177,7 @@ app.get('/saju/r/:year/:month/:day/:time', (req, res) => {
 
   try {
     const saju = calcSaju(year, month, day, hour);
+    res.set('X-Robots-Tag', 'noindex, follow');
     res.send(renderSajuResult(year, month, day, timeParam, saju));
   } catch (e) {
     res.send(renderSajuForm({ error: '입력하신 날짜를 계산할 수 없어요. 날짜를 다시 확인해주세요.' }));

@@ -432,3 +432,63 @@ main { padding-bottom: 40px; }
 .link-grid-item:hover {
   border-color: var(--accent, var(--primary));
 }
+
+/* 콘텐츠 제작 기준과 채점 방식을 읽기 편하게 보여주는 안내 영역 */
+.editorial-guide {
+  text-align: left;
+}
+.editorial-guide p:last-child {
+  margin-bottom: 0;
+}
+.quiz-guide,
+.quiz-result-guide,
+.result-guide {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #faf9f7;
+  text-align: left;
+}
+.quiz-guide strong,
+.quiz-result-guide summary,
+.result-guide summary {
+  font-weight: 750;
+}
+.quiz-guide ul,
+.about-principles {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+.quiz-guide p,
+.result-guide p,
+.result-type-list p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.quiz-result-guide summary,
+.result-guide summary {
+  cursor: pointer;
+}
+.result-type-list article {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.result-type-list article:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.result-type-list h3 {
+  margin: 0 0 4px;
+  font-size: 0.96rem;
+}
+.result-type-list p {
+  margin: 0;
+}
+.about-page {
+  padding-top: 24px;
+  padding-bottom: 16px;
+}
+.about-page .info-card {
+  text-align: left;
+}

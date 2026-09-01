@@ -39,13 +39,26 @@ check_contains() {
 }
 
 check_redirect_location() {
-  local desc="$1" url="$2" needle="$3"
-  loc=$(curl -s -o /dev/null -D - "$url" | grep -i '^location:' | tr -d '\r')
+  local desc="$1" url="$2" needle="$3" extra="${4:-}"
+  loc=$(curl -s -o /dev/null -D - $extra "$url" | grep -i '^location:' | tr -d '\r')
   if echo "$loc" | grep -q "$needle"; then
     echo "PASS  redirect→'$needle': $desc ($loc)"
     pass=$((pass+1))
   else
     echo "FAIL  redirect expected '$needle': $desc (got: $loc)"
+    fail=$((fail+1))
+  fi
+}
+
+check_header_contains() {
+  local desc="$1" url="$2" needle="$3" extra="${4:-}"
+  local headers
+  headers=$(curl -s -o /dev/null -D - $extra "$url" | tr -d '\r')
+  if echo "$headers" | grep -qi "$needle"; then
+    echo "PASS  header contains '$needle': $desc"
+    pass=$((pass+1))
+  else
+    echo "FAIL  header missing '$needle': $desc ($url)"
     fail=$((fail+1))
   fi
 }
@@ -86,16 +99,23 @@ check_contains "홈에 사주·운세 섹션" "$BASE/" "사주"
 check_contains "홈에 트렌드 테스트 섹션" "$BASE/" "트렌드 테스트"
 check_contains "홈에 검색용 H1" "$BASE/" "<h1 class=\"home-title\">무료 사주·운세·심리테스트</h1>"
 check_contains "홈에 WebSite 구조화데이터" "$BASE/" '"@type":"WebSite"'
+check_contains "홈에 콘텐츠 제작 기준 안내" "$BASE/" "결과는 이렇게 만들어요"
+check_status "사이트 소개" "$BASE/about" 200
+check_contains "사이트 소개에 채점 기준" "$BASE/about" "심리테스트 채점 기준"
+check_contains "사이트 소개에 AboutPage 구조화데이터" "$BASE/about" '"@type":"AboutPage"'
 check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
 check_status "ads.txt" "$BASE/ads.txt" 200
 check_contains "ads.txt 판매자 레코드" "$BASE/ads.txt" "google.com, pub-8602848692420724, DIRECT, f08c47fec0942fa0"
 check_status "robots.txt" "$BASE/robots.txt" 200
 check_contains "robots.txt sitemap 링크" "$BASE/robots.txt" "Sitemap:"
+check_contains "robots.txt 공식 도메인" "$BASE/robots.txt" "https://yozeum-test.com/sitemap.xml"
 check_status "sitemap.xml" "$BASE/sitemap.xml" 200
 check_contains "sitemap에 /saju 포함" "$BASE/sitemap.xml" "/saju"
 check_contains "sitemap에 /unse 포함" "$BASE/sitemap.xml" "/unse"
 check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
+check_contains "sitemap에 /about 포함" "$BASE/sitemap.xml" "/about<"
+check_contains "sitemap 공식 도메인" "$BASE/sitemap.xml" "https://yozeum-test.com/"
 check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
 check_contains "sitemap에 /gunghap/r/rat/ox(정규 궁합 조합) 포함" "$BASE/sitemap.xml" "/gunghap/r/rat/ox<"
 check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
@@ -104,8 +124,8 @@ check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/si
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((6 + quiz_count + 12 + 78 + 10))
-echo "sitemap내 URL수: $url_count (기대값: 정적6+퀴즈${quiz_count}+운세12+궁합78+일간10=${expected})"
+expected=$((7 + quiz_count + 12 + 78 + 10))
+echo "sitemap내 URL수: $url_count (기대값: 정적7+퀴즈${quiz_count}+운세12+궁합78+일간10=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -118,13 +138,20 @@ echo ""
 echo "=== 기존 퀴즈 회귀 테스트 ==="
 check_status "퀴즈 페이지" "$BASE/q/meta-sensing" 200
 check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
+check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8개 문항"
+check_contains "퀴즈 페이지에 결과 유형 설명" "$BASE/q/meta-sensing" "어떤 결과 유형이 있나요?"
+check_contains "퀴즈 결과에 채점 설명" "$BASE/q/meta-sensing/r/detective" "이 결과는 어떻게 정해졌나요?"
+check_header_contains "퀴즈 결과 페이지 색인 제외" "$BASE/q/meta-sensing/r/detective" "X-Robots-Tag: noindex, follow"
 check_status "존재하지 않는 퀴즈 → 홈 리다이렉트" "$BASE/q/nope" 302
+
+check_status "Render 기본 주소는 공식 도메인으로 영구 이동" "$BASE/q/meta-sensing" 301 "-HHost:yozeum-test.onrender.com"
+check_redirect_location "Render 기본 주소 리다이렉트 목적지" "$BASE/q/meta-sensing" "https://yozeum-test.com/q/meta-sensing" "-HHost:yozeum-test.onrender.com"
 
 echo ""
 echo "=== 유형+점수(일치율) 결합형 결과 ==="
 check_status "점수 파라미터 포함 결과 페이지" "$BASE/q/meta-sensing/r/detective?s=87" 200
 check_contains "점수 파라미터 있으면 일치율 표시" "$BASE/q/meta-sensing/r/detective?s=87" "87%"
-if curl -s "$BASE/q/meta-sensing/r/detective" -o /tmp/yozeum_resp.html && ! grep -q "일치율" /tmp/yozeum_resp.html; then
+if curl -s "$BASE/q/meta-sensing/r/detective" -o /tmp/yozeum_resp.html && ! grep -q 'class="compat-box"' /tmp/yozeum_resp.html; then
   echo "PASS  점수 파라미터 없으면 일치율 블록이 나타나지 않음"
   pass=$((pass+1))
 else
@@ -179,6 +206,7 @@ check_contains "사주 폼에 출생시간 FAQ" "$BASE/saju" "태어난 시간�
 check_contains "사주 폼에 결과 읽는 순서" "$BASE/saju" "만세력 결과는 이 순서로 확인하세요"
 check_redirect_location "compute(시간있음)→결과 리다이렉트" "$BASE/saju/compute?year=1990&month=5&day=20&hour=14" "/saju/r/1990/5/20/14"
 check_status "결과(시간있음, 1990-05-20 14시)" "$BASE/saju/r/1990/5/20/14" 200
+check_header_contains "개인화 사주 결과 색인 제외" "$BASE/saju/r/1990/5/20/14" "X-Robots-Tag: noindex, follow"
 check_contains "1990-05-20 년주=庚午" "$BASE/saju/r/1990/5/20/14" "庚午"
 check_contains "1990-05-20 14시 시주=癸未" "$BASE/saju/r/1990/5/20/14" "癸未"
 check_contains "시간있음 결과는 8글자 기준" "$BASE/saju/r/1990/5/20/14" "8글자 기준"

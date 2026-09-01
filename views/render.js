@@ -18,7 +18,7 @@ const {
 } = require('../lib/fortune');
 
 const SITE_NAME = '요즘테스트';
-const SITE_URL = process.env.SITE_URL || 'https://yozeum-test.onrender.com';
+const SITE_URL = (process.env.SITE_URL || 'https://yozeum-test.com').replace(/\/+$/, '');
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
 const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || 'G-YMN47H27JQ';
@@ -87,6 +87,7 @@ ${content}
     <p class="disclaimer">본 사이트의 사주·운세·테스트 콘텐츠는 재미를 위한 것이며 공식 심리검사·의학적 진단·전문 명리 상담을 대신하지 않습니다.</p>
     <nav class="footer-nav">
       <a href="/">홈</a>
+      <a href="/about">사이트 소개</a>
       <a href="/privacy.html">개인정보처리방침</a>
       <a href="/terms.html">이용약관</a>
     </nav>
@@ -250,6 +251,13 @@ function renderHome(quizzes, fortuneTools) {
       <div class="quiz-grid">${quizCards}</div>
     </section>
 
+    <section class="info-card editorial-guide">
+      <h2>결과는 이렇게 만들어요</h2>
+      <p>사주 계산기는 양력 생년월일과 절기 경계를 기준으로 네 기둥과 오행을 계산합니다. 심리테스트는 답변마다 연결된 유형 점수를 합산해 가장 가까운 결과를 보여줍니다.</p>
+      <p>운세와 테스트는 가볍게 참고할 콘텐츠입니다. 중요한 결정은 결과 하나에 맡기기보다 현재 상황과 자신의 판단을 함께 살펴보세요.</p>
+      <p><a href="/about">계산 방식과 콘텐츠 운영 기준 보기 →</a></p>
+    </section>
+
   </main>`;
 
   return baseLayout({
@@ -265,6 +273,80 @@ function renderHome(quizzes, fortuneTools) {
       inLanguage: 'ko-KR',
     },
     content,
+  });
+}
+
+function renderAboutPage() {
+  const aboutUrl = `${SITE_URL}/about`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      name: `사이트 소개 - ${SITE_NAME}`,
+      description: '요즘테스트의 사주·운세 계산 방식과 심리테스트 채점 기준, 콘텐츠 운영 원칙을 안내합니다.',
+      url: aboutUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '사이트 소개', item: aboutUrl },
+      ],
+    },
+  ];
+
+  const content = `
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <h1>요즘테스트는 이렇게 운영합니다</h1>
+      <p class="tagline">재미로 시작하되, 계산 방식과 한계는 분명하게 알려드려요</p>
+    </div>
+  </header>
+
+  <main class="container about-page">
+    <section class="info-card">
+      <h2>무엇을 제공하나요?</h2>
+      <p>요즘테스트는 회원가입 없이 이용할 수 있는 사주·오늘의 운세·띠 궁합·유형 테스트를 한곳에 모은 서비스입니다. 결과를 빨리 보여주는 데서 그치지 않고, 어떤 기준으로 계산했는지 함께 설명하는 것을 원칙으로 삼고 있습니다.</p>
+    </section>
+
+    <section class="info-card">
+      <h2>사주와 궁합 계산 기준</h2>
+      <p>사주팔자는 입력한 양력 생년월일과 출생시간을 바탕으로 년주·월주·일주·시주를 계산합니다. 월주는 입춘 등 절기 경계를 반영하며, 출생시간을 모르면 시주를 제외한 여섯 글자를 보여줍니다.</p>
+      <p>띠 궁합은 전통적인 삼합·육합·충 관계를 기준으로 두 띠의 관계를 설명합니다. 오행 개수나 띠 하나만으로 사람의 성격과 미래를 단정할 수 없으므로, 결과는 기본 구조를 이해하는 참고 자료로 봐주세요.</p>
+    </section>
+
+    <section class="info-card">
+      <h2>오늘의 운세를 만드는 방식</h2>
+      <p>오늘의 띠별 운세는 날짜와 띠를 기준으로 같은 날에는 같은 결과가 나오도록 구성합니다. 종합운·연애운·금전운·건강운 문구를 조합해 매일 확인할 수 있게 했으며, 실제 사건을 예측하거나 투자·의료 판단을 대신하지 않습니다.</p>
+    </section>
+
+    <section class="info-card">
+      <h2>심리테스트 채점 기준</h2>
+      <p>각 선택지는 하나의 결과 유형과 연결됩니다. 모든 문항에 답하면 유형별 선택 횟수를 합산하고, 가장 많이 선택된 유형을 결과로 보여줍니다. 동점일 때는 먼저 점수가 쌓인 유형을 우선합니다.</p>
+      <p>이 테스트들은 임상심리 검사나 성격 진단 도구가 아닙니다. 정답을 찾기보다 평소 선택 습관을 가볍게 돌아보는 용도로 이용해 주세요.</p>
+    </section>
+
+    <section class="info-card">
+      <h2>콘텐츠 운영 원칙</h2>
+      <ul class="about-principles">
+        <li>계산에 필요한 정보만 받고 회원가입을 요구하지 않습니다.</li>
+        <li>결과의 계산 방식과 참고 범위를 페이지 안에서 설명합니다.</li>
+        <li>검색어를 억지로 반복하지 않고, 실제 이용에 필요한 설명을 우선합니다.</li>
+        <li>새 콘텐츠는 문항과 결과 설명을 직접 검토한 뒤 공개합니다.</li>
+      </ul>
+    </section>
+  </main>`;
+
+  return baseLayout({
+    title: `사이트 소개·계산 방식 - ${SITE_NAME}`,
+    description: '요즘테스트의 사주·운세 계산 방식과 심리테스트 채점 기준, 콘텐츠 운영 원칙을 확인하세요.',
+    ogUrl: aboutUrl,
+    content,
+    structuredData,
   });
 }
 
@@ -305,6 +387,28 @@ function renderQuizPage(quiz) {
     <section class="tool-card quiz-app" style="--accent:${quiz.themeColor}" data-quiz-id="${quiz.id}">
       <div id="quiz-intro">
         <p class="tool-desc">${escapeHtml(quiz.intro)}</p>
+        <div class="quiz-guide">
+          <strong>이 테스트는 이렇게 진행돼요</strong>
+          <ul>
+            <li>총 ${quiz.questions.length}개 문항에 차례로 답합니다.</li>
+            <li>선택할 때마다 해당 답변과 연결된 유형에 1점이 더해집니다.</li>
+            <li>마지막에 점수가 가장 높은 유형과 전체 문항 대비 일치율을 보여드립니다.</li>
+          </ul>
+          <p>재미와 자기 이해를 위한 콘텐츠로, 공식 심리검사나 의학적 진단은 아닙니다.</p>
+        </div>
+        <details class="quiz-result-guide">
+          <summary>어떤 결과 유형이 있나요?</summary>
+          <div class="result-type-list">
+            ${Object.values(quiz.results)
+              .map(
+                (result) => `<article>
+              <h3>${result.emoji} ${escapeHtml(result.title)}</h3>
+              <p>${escapeHtml(result.desc)}</p>
+            </article>`,
+              )
+              .join('')}
+          </div>
+        </details>
         <button id="start-btn" class="quiz-btn">테스트 시작하기</button>
       </div>
 
@@ -377,6 +481,12 @@ function renderResultPage(quiz, resultKey, matchScore) {
       <h1>${escapeHtml(result.title)}</h1>
       <p class="result-desc">${escapeHtml(result.desc)}</p>
       ${scoreHtml}
+
+      <details class="result-guide">
+        <summary>이 결과는 어떻게 정해졌나요?</summary>
+        <p>총 ${quiz.questions.length}개 답변에 연결된 유형별 점수를 합산했습니다. 그중 가장 많이 선택된 유형이 <strong>${escapeHtml(result.title)}</strong>이었습니다. 일치율은 이 유형을 고른 횟수를 전체 문항 수로 나눈 값입니다.</p>
+        <p>선택이 비슷하게 나왔다면 다른 유형의 특징도 함께 있을 수 있어요. 결과는 가벼운 자기 이해용으로 봐주세요.</p>
+      </details>
 
       <div class="result-actions">
         <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareUrl)}" data-text="${escapeHtml(result.shareText)}">
@@ -981,6 +1091,7 @@ function renderGunghapResult(myKey, partnerKey, relation) {
 
 module.exports = {
   renderHome,
+  renderAboutPage,
   renderQuizPage,
   renderResultPage,
   renderSajuForm,
