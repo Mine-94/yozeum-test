@@ -155,7 +155,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
   });
 }
 
-function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, extraHtml }) {
+function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, extraHtml, structuredData }) {
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
     <div class="container">
@@ -199,6 +199,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
     ogUrl,
     themeColor: accent,
     content,
+    structuredData,
   });
 }
 
@@ -269,6 +270,27 @@ function renderHome(quizzes, fortuneTools) {
 
 // --- 트렌드 테스트 (기존) ---
 function renderQuizPage(quiz) {
+  const quizUrl = `${SITE_URL}/q/${quiz.id}`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `${quiz.title} - ${SITE_NAME}`,
+      description: quiz.subtitle,
+      url: quizUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: quiz.title, item: quizUrl },
+      ],
+    },
+  ];
+
   const content = `
   <header class="site-header quiz-header" style="--accent:${quiz.themeColor}">
     <div class="container">
@@ -303,15 +325,36 @@ function renderQuizPage(quiz) {
   return baseLayout({
     title: `${quiz.title} - ${SITE_NAME}`,
     description: quiz.subtitle,
-    ogUrl: `${SITE_URL}/q/${quiz.id}`,
+    ogUrl: quizUrl,
     themeColor: quiz.themeColor,
     content,
+    structuredData,
   });
 }
 
 function renderResultPage(quiz, resultKey, matchScore) {
   const result = quiz.results[resultKey];
   const shareUrl = `${SITE_URL}/q/${quiz.id}/r/${resultKey}`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `나의 결과는 "${result.title}" - ${quiz.title}`,
+      description: result.shareText,
+      url: shareUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: quiz.title, item: `${SITE_URL}/q/${quiz.id}` },
+        { '@type': 'ListItem', position: 3, name: result.title, item: shareUrl },
+      ],
+    },
+  ];
   const scoreHtml = Number.isInteger(matchScore)
     ? `
       <div class="compat-box" style="text-align:center;">
@@ -359,6 +402,7 @@ function renderResultPage(quiz, resultKey, matchScore) {
     ogUrl: shareUrl,
     themeColor: quiz.themeColor,
     content,
+    structuredData,
   });
 }
 
@@ -568,6 +612,27 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
   `;
 
   const shareUrl = `${SITE_URL}/saju/r/${year}/${month}/${day}/${timeSeg}`;
+  const pageTitle = `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}(${stemInfo.symbol})`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: pageTitle,
+      description: `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}, ${stemInfo.symbol}. 오행 분포와 간이 풀이를 확인해보세요.`,
+      url: shareUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '사주팔자 계산기', item: `${SITE_URL}/saju` },
+        { '@type': 'ListItem', position: 3, name: pageTitle, item: shareUrl },
+      ],
+    },
+  ];
 
   return resultPageShell({
     accent: '#5b4b8a',
@@ -576,12 +641,13 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
     titleHtml: '나의 사주팔자',
     bodyHtml,
     ogUrl: shareUrl,
-    ogTitle: `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}(${stemInfo.symbol}) - ${SITE_NAME}`,
+    ogTitle: `${pageTitle} - ${SITE_NAME}`,
     description: `${year}년 ${month}월 ${day}일생 사주팔자 — 일간 ${dayStemKo}, ${stemInfo.symbol}. 오행 분포와 간이 풀이를 확인해보세요.`,
     backHref: '/saju',
     backLabel: '다시 계산하기',
     shareUrl,
     shareText: `나의 사주 일간은 ${dayStemKo}(${stemInfo.symbol})! 오행 분포까지 확인해보세요 🔮`,
+    structuredData,
   });
 }
 
@@ -626,6 +692,28 @@ function renderIlganPage(stemRomanKey) {
     <p class="disclaimer" style="text-align:left;margin-top:20px;">이 페이지는 일간 하나만으로 보는 간이 상징·성격 해설이며, 실제 사주 해석은 년·월·일·시주 전체와 오행 분포, 십성·용신 등을 함께 봐야 훨씬 정확해요.</p>
   `;
 
+  const pageTitle = `${ko}${el} 성격 — 일간 ${ko}일간이란?`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: pageTitle,
+      description: `일간 ${ko}(${el}) 성격 해설. ${stemInfo.symbol} — ${stemInfo.desc}`,
+      url: pageUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '사주팔자 계산기', item: `${SITE_URL}/saju` },
+        { '@type': 'ListItem', position: 3, name: `${ko}일간 성격`, item: pageUrl },
+      ],
+    },
+  ];
+
   return resultPageShell({
     accent: ILGAN_ACCENT,
     eyebrow: '일간(日干) 성격',
@@ -633,10 +721,11 @@ function renderIlganPage(stemRomanKey) {
     titleHtml: `${ko}일간(${ko}${el}) 성격`,
     bodyHtml,
     ogUrl: pageUrl,
-    ogTitle: `${ko}${el} 성격 — 일간 ${ko}일간이란? - ${SITE_NAME}`,
+    ogTitle: `${pageTitle} - ${SITE_NAME}`,
     description: `일간 ${ko}(${el}) 성격 해설. ${stemInfo.symbol} — ${stemInfo.desc}`,
     backHref: '/saju',
     backLabel: '내 사주팔자 계산하기',
+    structuredData,
   });
 }
 
@@ -734,6 +823,28 @@ function renderUnseResult(animalKey) {
     <p class="disclaimer" style="text-align:left;margin-top:16px;">오늘의 운세는 날짜별로 자동 생성되는 재미 콘텐츠이며 실제 운세를 예측·보장하지 않아요.</p>
   `;
 
+  const pageTitle = `${todayShort} ${info.name}띠 오늘의 운세`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: pageTitle,
+      description: `${todayShort} ${info.name}띠 오늘의 운세 — ${lines['총운']}`,
+      url: shareUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '오늘의 띠별 운세', item: `${SITE_URL}/unse` },
+        { '@type': 'ListItem', position: 3, name: `${info.name}띠`, item: shareUrl },
+      ],
+    },
+  ];
+
   return resultPageShell({
     accent: '#c9622a',
     eyebrow: '오늘의 띠별 운세',
@@ -741,12 +852,13 @@ function renderUnseResult(animalKey) {
     titleHtml: `${info.name}띠, 오늘의 운세`,
     bodyHtml,
     ogUrl: shareUrl,
-    ogTitle: `${todayShort} ${info.name}띠 오늘의 운세 - ${SITE_NAME}`,
+    ogTitle: `${pageTitle} - ${SITE_NAME}`,
     description: `${todayShort} ${info.name}띠 오늘의 운세 — ${lines['총운']}`,
     backHref: '/unse',
     backLabel: '다른 띠 운세도 보기',
     shareUrl,
     shareText: `오늘 ${info.name}띠 운세: ${lines['총운']}`,
+    structuredData,
   });
 }
 
@@ -828,6 +940,28 @@ function renderGunghapResult(myKey, partnerKey, relation) {
     <p class="disclaimer" style="text-align:left;margin-top:16px;">이 결과는 명리학의 지지(地支) 관계 이론(삼합·육합·충) 중 두 띠 사이의 기본 관계만 본 참고용 콘텐츠예요. 실제 궁합은 생년월일시 전체를 함께 봐야 훨씬 정확해요 — <a href="/saju">사주팔자 계산기</a>도 확인해보세요.</p>
   `;
 
+  const pageTitle = `${my.name}띠 × ${partner.name}띠 궁합은? (${rel.label})`;
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: pageTitle,
+      description: `${my.name}띠와 ${partner.name}띠의 궁합: ${rel.label}. ${rel.desc}`,
+      url: shareUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '띠 궁합', item: `${SITE_URL}/gunghap` },
+        { '@type': 'ListItem', position: 3, name: `${my.name}띠 × ${partner.name}띠`, item: shareUrl },
+      ],
+    },
+  ];
+
   return resultPageShell({
     accent: '#b0473e',
     eyebrow: '띠 궁합 결과',
@@ -835,12 +969,13 @@ function renderGunghapResult(myKey, partnerKey, relation) {
     titleHtml: `${my.name}띠 × ${partner.name}띠 궁합`,
     bodyHtml,
     ogUrl: shareUrl,
-    ogTitle: `${my.name}띠 × ${partner.name}띠 궁합은? (${rel.label}) - ${SITE_NAME}`,
+    ogTitle: `${pageTitle} - ${SITE_NAME}`,
     description: `${my.name}띠와 ${partner.name}띠의 궁합: ${rel.label}. ${rel.desc}`,
     backHref: '/gunghap',
     backLabel: '다른 궁합도 보기',
     shareUrl,
     shareText: `${my.name}띠 × ${partner.name}띠 궁합은 ${rel.label}! 🔮`,
+    structuredData,
   });
 }
 
