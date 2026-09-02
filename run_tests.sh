@@ -105,8 +105,17 @@ check_contains "홈 우선순위 카드에 GA4 선택 추적값" "$BASE/" 'data-
 check_contains "홈에 관심사별 빠른 탐색" "$BASE/" 'aria-label="관심사별 바로가기"'
 check_contains "홈에 저장형 오늘 운세 폼" "$BASE/" "data-save-birth-year"
 check_contains "홈에 접근성 본문 바로가기" "$BASE/" "본문으로 바로가기"
+check_contains "홈에 전역 주요 메뉴" "$BASE/" 'aria-label="주요 메뉴"'
+check_contains "전역 메뉴에 핵심 콘텐츠 링크" "$BASE/mbti/type/INFP" 'href="/unse">오늘운세'
 check_header_contains "홈 보안 헤더 nosniff" "$BASE/" "X-Content-Type-Options: nosniff"
 check_header_contains "홈 보안 헤더 referrer policy" "$BASE/" "Referrer-Policy: strict-origin-when-cross-origin"
+if curl -s -D - "$BASE/" -o /dev/null | grep -qi '^X-Powered-By:'; then
+  echo "FAIL  프레임워크 식별 헤더가 노출됨"
+  fail=$((fail+1))
+else
+  echo "PASS  프레임워크 식별 헤더 제거"
+  pass=$((pass+1))
+fi
 curl -s "$BASE/" -o /tmp/yozeum_home.html
 priority_order=$(grep -o 'data-priority-rank="[1-6]"' /tmp/yozeum_home.html | tr -cd '1-6')
 if [ "$priority_order" = "123456" ]; then
@@ -119,6 +128,9 @@ fi
 check_status "사이트 소개" "$BASE/about" 200
 check_contains "사이트 소개에 채점 기준" "$BASE/about" "심리테스트 채점 기준"
 check_contains "사이트 소개에 AboutPage 구조화데이터" "$BASE/about" '"@type":"AboutPage"'
+check_contains "사이트 소개에 제작·검토 과정" "$BASE/about" "누가, 어떻게 만들고 검토하나요?"
+check_contains "사이트 소개에 자동화 보조 공개" "$BASE/about" "자동화 도구를 보조적으로"
+check_contains "사이트 소개에 오류 수정 원칙" "$BASE/about" "업데이트와 오류 수정 원칙"
 check_status "읽을거리 허브" "$BASE/guides" 200
 check_contains "읽을거리 허브에 CollectionPage 구조화데이터" "$BASE/guides" '"@type":"CollectionPage"'
 for guide in saju-first-read five-elements-balance zodiac-compatibility personality-test-results; do
@@ -131,6 +143,9 @@ check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
 check_contains "개인정보처리방침 canonical" "$BASE/privacy.html" 'rel="canonical" href="https://yozeum-test.com/privacy.html"'
 check_contains "이용약관 canonical" "$BASE/terms.html" 'rel="canonical" href="https://yozeum-test.com/terms.html"'
+check_contains "개인정보처리방침에 분석 정보 항목" "$BASE/privacy.html" "방문 페이지, 유입 경로"
+check_contains "개인정보처리방침에 Google 정책 링크" "$BASE/privacy.html" "policies.google.com/privacy"
+check_contains "개인정보처리방침에서 실제 수집 범위 명시" "$BASE/privacy.html" "회원 계정, 이름, 전화번호, 이메일을 직접 수집하는 기능을 현재 제공하지 않습니다"
 check_status "확장자 없는 개인정보 주소는 정규 URL로 영구 이동" "$BASE/privacy" 301
 check_redirect_location "개인정보 주소 정규화" "$BASE/privacy" "/privacy.html"
 check_status "확장자 없는 약관 주소는 정규 URL로 영구 이동" "$BASE/terms" 301
@@ -202,6 +217,7 @@ check_contains "INFP 유형에 성격 설명" "$BASE/mbti/type/INFP" "가치 중
 check_contains "INFP 유형에 연애·관계 설명" "$BASE/mbti/type/INFP" "연애와 인간관계"
 check_contains "INFP 유형에 업무 환경 설명" "$BASE/mbti/type/INFP" "일할 때 강점과 어울리는 환경"
 check_contains "유형 페이지 Article 구조화데이터" "$BASE/mbti/type/INFP" '"@type":"Article"'
+check_contains "유형 페이지에 작성 주체와 검토일" "$BASE/mbti/type/INFP" "요즘테스트 운영자 · 2026년 9월 2일 검토"
 check_status "소문자 MBTI 유형은 정규 URL로 영구 이동" "$BASE/mbti/type/infp" 301
 check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" "/mbti/type/INFP"
 check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "E 20%"

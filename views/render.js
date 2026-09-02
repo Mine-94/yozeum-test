@@ -76,6 +76,8 @@ function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, conten
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 <link rel="manifest" href="/manifest.json" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
 ${robots ? `<meta name="robots" content="${escapeHtml(robots)}" />` : ''}
@@ -99,6 +101,16 @@ ${GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/
 </head>
 <body class="${bodyClass || ''}">
 <a class="skip-link" href="#main-content">본문으로 바로가기</a>
+<nav class="global-nav" aria-label="주요 메뉴">
+  <div class="global-nav-inner">
+    <a href="/">홈</a>
+    <a href="/unse">오늘운세</a>
+    <a href="/mbti">MBTI</a>
+    <a href="/saju">사주</a>
+    <a href="/#tests">테스트</a>
+    <a href="/guides">읽을거리</a>
+  </div>
+</nav>
 ${accessibleContent}
 <footer class="site-footer">
   <div class="container">
@@ -370,7 +382,7 @@ function renderHome(quizzes, fortuneTools, guides) {
       <div class="quiz-grid">${fortuneCards}</div>
     </section>
 
-    <section class="content-section">
+    <section class="content-section" id="tests">
       <h2 class="section-title">🎯 가볍게 해보는 테스트</h2>
       <div class="quiz-grid">${quizCards}</div>
     </section>
@@ -437,6 +449,7 @@ function renderAboutPage() {
   </header>
 
   <main class="container about-page">
+    <p class="article-meta about-meta">운영 주체 · 요즘테스트 운영자 &nbsp;|&nbsp; 최종 검토 · 2026년 9월 2일</p>
     <section class="info-card">
       <h2>무엇을 제공하나요?</h2>
       <p>요즘테스트는 회원가입 없이 이용할 수 있는 사주·오늘의 운세·띠 궁합·유형 테스트를 한곳에 모은 서비스입니다. 결과를 빨리 보여주는 데서 그치지 않고, 어떤 기준으로 계산했는지 함께 설명하는 것을 원칙으로 삼고 있습니다.</p>
@@ -467,6 +480,18 @@ function renderAboutPage() {
         <li>검색어를 억지로 반복하지 않고, 실제 이용에 필요한 설명을 우선합니다.</li>
         <li>새 콘텐츠는 문항과 결과 설명을 직접 검토한 뒤 공개합니다.</li>
       </ul>
+    </section>
+
+    <section class="info-card">
+      <h2>누가, 어떻게 만들고 검토하나요?</h2>
+      <p>사이트의 기능과 글은 요즘테스트 운영자가 기획하고 관리합니다. 사주 계산은 공개된 달력 계산 라이브러리와 명리학의 일반적인 절기·간지 대응을 코드로 구현하고, 경계 날짜와 잘못된 입력을 자동 테스트로 확인합니다. 심리테스트는 먼저 살펴볼 행동 기준을 정한 뒤 문항, 선택지, 채점 연결, 결과 설명이 서로 맞는지 검토합니다.</p>
+      <p>문장 초안과 반복 검수에는 자동화 도구를 보조적으로 사용할 수 있습니다. 다만 생성된 문장을 그대로 대량 게시하지 않으며, 공개 전 계산 결과·표현의 정확성·페이지 간 중복·과도한 단정을 운영자가 확인합니다. 중요한 결정이나 전문적인 판단을 대신하는 표현은 사용하지 않습니다.</p>
+    </section>
+
+    <section class="info-card">
+      <h2>업데이트와 오류 수정 원칙</h2>
+      <p>오늘의 운세는 한국 날짜와 띠를 기준으로 매일 결과가 바뀌지만, 가이드와 유형 설명의 검토일은 내용이 실제로 달라졌을 때만 갱신합니다. 단순히 새 글처럼 보이게 하려고 날짜만 바꾸지 않습니다.</p>
+      <p>계산 오류나 설명의 모순이 확인되면 한 문장만 덮어쓰지 않고 원인과 영향을 받는 페이지를 함께 살핍니다. 수정 뒤에는 기존 도구가 망가지지 않았는지 전체 자동 테스트와 실제 서비스 응답을 다시 확인합니다.</p>
     </section>
   </main>`;
 
@@ -813,6 +838,7 @@ function renderMbtiType(typeCode, type, breakdown) {
       <p class="mbti-type-hero-code">${typeCode}</p>
       <h1>${typeCode} ${escapeHtml(type.name)}</h1>
       <p class="tagline">${escapeHtml(type.tagline)}</p>
+      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 2일 검토</p>
     </div>
   </header>
   <main class="container mbti-type-page">
@@ -840,7 +866,7 @@ function renderMbtiType(typeCode, type, breakdown) {
     {
       '@context': 'https://schema.org', '@type': 'Article', headline: `${typeCode} ${type.name}: 성격·연애·직업 상세 설명`,
       description: type.summary, url: pageUrl, mainEntityOfPage: pageUrl, inLanguage: 'ko-KR',
-      datePublished: '2026-09-01', dateModified: '2026-09-01',
+      datePublished: '2026-09-01', dateModified: '2026-09-02',
       author: { '@type': 'Organization', name: `${SITE_NAME} 운영자`, url: `${SITE_URL}/about` },
       publisher: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/` },
     },

@@ -34,6 +34,9 @@ const PORT = process.env.PORT || 3000;
 const ADSENSE_PUBLISHER_ID = (process.env.ADSENSE_CLIENT_ID || 'ca-pub-8602848692420724').replace(/^ca-/, '');
 const LEGACY_HOST = 'yozeum-test.onrender.com';
 
+// 프레임워크 정보는 서비스 이용에 필요하지 않으므로 응답 헤더에서 노출하지 않습니다.
+app.disable('x-powered-by');
+
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 300,
@@ -60,7 +63,13 @@ app.use((req, res, next) => {
 });
 
 // CSS·JS·아이콘은 요청 제한에 포함하지 않아 정상적인 페이지 열람이 제한량을 소모하지 않게 합니다.
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders(res, filePath) {
+    // HTML 정책 문서는 갱신 내용을 빠르게 반영하고, 정적 자원만 브라우저 캐시를 활용합니다.
+    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'public, max-age=300');
+  },
+}));
 app.use(limiter);
 
 // AdSense가 소유권과 판매자 정보를 확인할 수 있도록 반드시 루트에서
