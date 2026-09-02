@@ -5,7 +5,7 @@ const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
 const guides = require('./data/guides');
 const { questions: mbtiQuestions, types: mbtiTypes, axisInfo: mbtiAxisInfo } = require('./data/mbti');
-const { calcSaju, getTtiByYear, getTtiRelation, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
+const { calcSaju, getTtiByYear, getTtiRelation, getTodayKST, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
   renderAboutPage,
@@ -25,6 +25,7 @@ const {
   renderGunghapForm,
   renderGunghapResult,
   renderIlganPage,
+  renderNotFound,
   SITE_URL,
 } = require('./views/render');
 
@@ -35,11 +36,10 @@ const LEGACY_HOST = 'yozeum-test.onrender.com';
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 300, // 정적 리소스(css/js)도 이 리미터를 통과하므로, 페이지 하나만 봐도 여러 요청이 소모됩니다.
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use(limiter);
 
 // 검색 신호가 Render 기본 주소와 공식 도메인으로 갈라지지 않도록 한 곳으로 모읍니다.
 app.use((req, res, next) => {
@@ -49,7 +49,19 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  });
+  next();
+});
+
+// CSS·JS·아이콘은 요청 제한에 포함하지 않아 정상적인 페이지 열람이 제한량을 소모하지 않게 합니다.
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(limiter);
 
 // AdSense가 소유권과 판매자 정보를 확인할 수 있도록 반드시 루트에서
 // text/plain으로 응답합니다. catch-all 리다이렉트보다 먼저 선언해야 합니다.
@@ -61,6 +73,11 @@ app.get('/ads.txt', (req, res) => {
 
 function findQuiz(id) {
   return quizzes.find((q) => q.id === id);
+}
+
+function notFound(res) {
+  res.set('X-Robots-Tag', 'noindex, follow');
+  return res.status(404).send(renderNotFound());
 }
 
 // --- 홈 ---
@@ -78,7 +95,7 @@ app.get('/guides', (req, res) => {
 
 app.get('/guides/:slug', (req, res) => {
   const guide = guides.find((item) => item.slug === req.params.slug);
-  if (!guide) return res.redirect('/guides');
+  if (!guide) return notFound(res);
   res.send(renderGuidePage(guide));
 });
 
@@ -129,7 +146,7 @@ app.get('/mbti/test', (req, res) => {
 
 app.get('/mbti/type/:type', (req, res) => {
   const typeCode = String(req.params.type || '').toUpperCase();
-  if (!mbtiTypes[typeCode]) return res.redirect('/mbti');
+  if (!mbtiTypes[typeCode]) return notFound(res);
   if (req.params.type !== typeCode) return res.redirect(301, `/mbti/type/${typeCode}`);
 
   const values = ['ei', 'sn', 'tf', 'jp'].map((key) => parseInt(req.query[key], 10));
@@ -161,7 +178,7 @@ app.get('/mbti/compatibility/result', (req, res) => {
 app.get('/mbti/compatibility/:first/:second', (req, res) => {
   const first = String(req.params.first || '').toUpperCase();
   const second = String(req.params.second || '').toUpperCase();
-  if (!mbtiTypes[first] || !mbtiTypes[second]) return res.redirect('/mbti/compatibility');
+  if (!mbtiTypes[first] || !mbtiTypes[second]) return notFound(res);
   const pair = [first, second].sort();
   if (req.params.first !== pair[0] || req.params.second !== pair[1]) {
     return res.redirect(301, `/mbti/compatibility/${pair[0]}/${pair[1]}`);
@@ -173,13 +190,13 @@ app.get('/mbti/compatibility/:first/:second', (req, res) => {
 // --- 트렌드 테스트 (기존, 선택식 퀴즈) ---
 app.get('/q/:id', (req, res) => {
   const quiz = findQuiz(req.params.id);
-  if (!quiz) return res.redirect('/');
+  if (!quiz) return notFound(res);
   res.send(renderQuizPage(quiz));
 });
 
 app.get('/q/:id/r/:resultKey', (req, res) => {
   const quiz = findQuiz(req.params.id);
-  if (!quiz || !quiz.results[req.params.resultKey]) return res.redirect('/');
+  if (!quiz || !quiz.results[req.params.resultKey]) return notFound(res);
   // 유형+점수 결합형: 클라이언트에서 계산한 "일치율"(?s=0~100)이 있으면 결과에 함께 표시.
   // 값이 없거나 유효 범위를 벗어나면 조용히 무시하고 기존과 동일하게 렌더링(캐노니컬 URL은 그대로 유지).
   const scoreRaw = parseInt(req.query.s, 10);
@@ -197,8 +214,9 @@ function isRealCalendarDate(year, month, day) {
 }
 
 function validYmd(year, month, day) {
+  const currentYear = Number(getTodayKST().slice(0, 4));
   return (
-    Number.isInteger(year) && year >= 1920 && year <= 2026 &&
+    Number.isInteger(year) && year >= 1920 && year <= currentYear &&
     Number.isInteger(month) && month >= 1 && month <= 12 &&
     Number.isInteger(day) && day >= 1 && day <= 31 &&
     isRealCalendarDate(year, month, day)
@@ -236,12 +254,12 @@ app.get('/saju/r/:year/:month/:day/:time', (req, res) => {
   const day = parseInt(req.params.day, 10);
   const timeParam = req.params.time;
 
-  if (!validYmd(year, month, day)) return res.redirect('/saju');
+  if (!validYmd(year, month, day)) return notFound(res);
 
   let hour = null;
   if (timeParam !== 'unknown') {
     hour = parseInt(timeParam, 10);
-    if (!Number.isInteger(hour) || hour < 0 || hour > 23) return res.redirect('/saju');
+    if (!Number.isInteger(hour) || hour < 0 || hour > 23) return notFound(res);
   }
 
   try {
@@ -255,7 +273,7 @@ app.get('/saju/r/:year/:month/:day/:time', (req, res) => {
 
 // --- 일간(日干) 단독 랜딩 페이지 ---
 app.get('/ilgan/:stemKey', (req, res) => {
-  if (!STEM_ROMAN_TO_KO[req.params.stemKey]) return res.redirect('/saju');
+  if (!STEM_ROMAN_TO_KO[req.params.stemKey]) return notFound(res);
   res.send(renderIlganPage(req.params.stemKey));
 });
 
@@ -266,7 +284,8 @@ app.get('/unse', (req, res) => {
 
 app.get('/unse/find', (req, res) => {
   const year = parseInt(req.query.year, 10);
-  if (!Number.isInteger(year) || year < 1920 || year > 2026) return res.redirect('/unse');
+  const currentYear = Number(getTodayKST().slice(0, 4));
+  if (!Number.isInteger(year) || year < 1920 || year > currentYear) return res.redirect('/unse');
   try {
     const tti = getTtiByYear(year);
     if (!tti) return res.redirect('/unse');
@@ -277,7 +296,7 @@ app.get('/unse/find', (req, res) => {
 });
 
 app.get('/unse/:animal', (req, res) => {
-  if (!TTI_ORDER.includes(req.params.animal)) return res.redirect('/unse');
+  if (!TTI_ORDER.includes(req.params.animal)) return notFound(res);
   res.send(renderUnseResult(req.params.animal));
 });
 
@@ -299,7 +318,7 @@ app.get('/gunghap/compute', (req, res) => {
 
 app.get('/gunghap/r/:my/:partner', (req, res) => {
   const { my, partner } = req.params;
-  if (!TTI_ORDER.includes(my) || !TTI_ORDER.includes(partner)) return res.redirect('/gunghap');
+  if (!TTI_ORDER.includes(my) || !TTI_ORDER.includes(partner)) return notFound(res);
   if (TTI_ORDER.indexOf(my) > TTI_ORDER.indexOf(partner)) {
     return res.redirect(301, `/gunghap/r/${partner}/${my}`);
   }
@@ -308,9 +327,9 @@ app.get('/gunghap/r/:my/:partner', (req, res) => {
   res.send(renderGunghapResult(my, partner, relation));
 });
 
-// 알 수 없는 경로는 홈으로
-app.get('*', (req, res) => {
-  res.redirect('/');
+// 없는 주소는 실제 404로 응답해 사용자와 검색엔진 모두에게 상태를 명확히 알립니다.
+app.use((req, res) => {
+  notFound(res);
 });
 
 app.listen(PORT, () => {

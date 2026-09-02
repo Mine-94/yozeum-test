@@ -49,11 +49,24 @@ function formatTodayKoreanShort(dateStr) {
   return `${m}월${d}일`;
 }
 
+function currentYearKST() {
+  return Number(getTodayKST().slice(0, 4));
+}
+
+function trackedShareUrl(url, campaign = 'result_share') {
+  const parsed = new URL(url);
+  parsed.searchParams.set('utm_source', 'user_share');
+  parsed.searchParams.set('utm_medium', 'referral');
+  parsed.searchParams.set('utm_campaign', campaign);
+  return parsed.toString();
+}
+
 function serializeJsonLd(data) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData }) {
+function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots }) {
+  const accessibleContent = content.replace(/<main(?![^>]*\bid=)/, '<main id="main-content"');
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -65,6 +78,7 @@ function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, conten
 <link rel="manifest" href="/manifest.json" />
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
+${robots ? `<meta name="robots" content="${escapeHtml(robots)}" />` : ''}
 <link rel="canonical" href="${escapeHtml(canonicalUrl || ogUrl)}" />
 ${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${escapeHtml(NAVER_SITE_VERIFICATION)}" />` : ''}
 <meta property="og:type" content="website" />
@@ -84,7 +98,8 @@ ${GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${escapeHtml(GA_MEASUREMENT_ID)}');</script>` : ''}
 </head>
 <body class="${bodyClass || ''}">
-${content}
+<a class="skip-link" href="#main-content">본문으로 바로가기</a>
+${accessibleContent}
 <footer class="site-footer">
   <div class="container">
     <p class="disclaimer">본 사이트의 사주·운세·테스트 콘텐츠는 재미를 위한 것이며 공식 심리검사·의학적 진단·전문 명리 상담을 대신하지 않습니다.</p>
@@ -150,6 +165,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="/js/preferences.js" defer></script>
 </body>
 </html>`;
 }
@@ -186,6 +202,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
 }
 
 function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, extraHtml, structuredData }) {
+  const shareLink = shareUrl ? trackedShareUrl(shareUrl) : '';
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
     <div class="container">
@@ -202,9 +219,10 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
       ${
         shareUrl
           ? `<div class="result-actions" style="margin-bottom:14px;">
-        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareUrl)}" data-text="${escapeHtml(shareText || '')}">
-          링크 복사해서 공유하기
+        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareLink)}" data-text="${escapeHtml(shareText || '')}" data-share-id="${escapeHtml(new URL(shareUrl).pathname)}">
+          결과 공유하기
         </button>
+        <p id="share-status" class="action-status" role="status" aria-live="polite"></p>
       </div>
       <script src="/js/result-share.js"></script>`
           : ''
@@ -235,6 +253,24 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
 
 // --- 홈 ---
 function renderHome(quizzes, fortuneTools, guides) {
+  const currentYear = currentYearKST();
+  const yearOptions = Array.from({ length: currentYear - 1920 + 1 }, (_, index) => currentYear - index)
+    .map((year) => `<option value="${year}">${year}년생</option>`)
+    .join('');
+
+  const quickPaths = [
+    { href: '/unse', label: '오늘', title: '오늘의 운세', emoji: '☀️', placement: 'home_intent_today' },
+    { href: '/mbti/test', label: '나', title: '성격 알아보기', emoji: '🧭', placement: 'home_intent_self' },
+    { href: '/mbti/compatibility', label: '우리', title: '관계 비교하기', emoji: '🤝', placement: 'home_intent_together' },
+    { href: '/mbti', label: '유형', title: 'MBTI 찾아보기', emoji: '🧩', placement: 'home_intent_types' },
+  ]
+    .map((item) => `
+      <a href="${item.href}" class="quick-path" data-content-id="${item.href}" data-content-type="intent_navigation" data-content-placement="${item.placement}">
+        <span class="quick-path-emoji">${item.emoji}</span>
+        <span><small>${item.label}</small><strong>${item.title}</strong></span>
+      </a>`)
+    .join('');
+
   const fortuneCards = fortuneTools
     .map(
       (t) => `
@@ -277,7 +313,7 @@ function renderHome(quizzes, fortuneTools, guides) {
     { rank: 3, href: '/mbti', emoji: '🧩', title: 'MBTI 16유형 설명', text: '성격·관계·일·스트레스 반응을 유형별로 자세히 읽어보세요.' },
     { rank: 4, href: '/saju', emoji: '📜', title: '무료 만세력·사주팔자', text: '생년월일로 사주 네 기둥과 오행 분포를 계산합니다.' },
     { rank: 5, href: '/mbti/compatibility', emoji: '🤝', title: 'MBTI 궁합', text: '두 유형의 공통점과 차이를 네 가지 축으로 비교합니다.' },
-    { rank: 6, href: '/q/teto-egen', emoji: '⚡', title: '테토 에겐 유형 테스트', text: '요즘 화제인 테토·에겐 성향을 가볍게 알아봅니다.' },
+    { rank: 6, href: '/q/teto-egen', emoji: '⚡', title: '테토·에겐 유형 테스트', text: '행동과 관계에서 드러나는 두 가지 성향을 가볍게 살펴봅니다.' },
   ]
     .map(
       (item) => `
@@ -291,20 +327,40 @@ function renderHome(quizzes, fortuneTools, guides) {
     .join('\n');
 
   const content = `
-  <header class="site-header">
+  <header class="site-header home-header">
     <div class="container">
       <a href="/" class="logo">${SITE_NAME}</a>
-      <h1 class="home-title">무료 사주·운세·심리테스트</h1>
-      <p class="tagline">사주·운세부터 요즘 화제인 테스트까지 — 무료, 회원가입 없이</p>
+      <p class="home-kicker">오늘의 운세부터 성격과 궁합까지</p>
+      <h1 class="home-title">지금 궁금한 나를<br>가볍게 알아보세요</h1>
+      <p class="tagline">회원가입 없이 바로 시작할 수 있어요. 결과를 단정하지 않고, 계산 방식과 한계를 함께 알려드립니다.</p>
     </div>
   </header>
 
 
   <main class="container">
+    <nav class="quick-path-grid" aria-label="관심사별 바로가기">
+      ${quickPaths}
+    </nav>
+
+    <section class="home-daily-card" aria-labelledby="home-daily-title">
+      <div class="home-daily-copy">
+        <span class="home-daily-label">매일 새로 확인하기</span>
+        <h2 id="home-daily-title">내 띠의 오늘 운세</h2>
+        <p>태어난 연도를 고르면 오늘의 총운·애정운·금전운·건강운을 바로 보여드려요.</p>
+      </div>
+      <form action="/unse/find" method="GET" class="home-daily-form" data-tool-id="daily_fortune" data-save-birth-year>
+        <label for="home-birth-year" class="sr-only">태어난 연도</label>
+        <select name="year" id="home-birth-year" required>${yearOptions}</select>
+        <button type="submit" class="quiz-btn">오늘 운세 보기</button>
+      </form>
+      <a href="/unse" class="saved-fortune-link" data-saved-fortune hidden>저장한 띠의 오늘 운세 바로 보기 →</a>
+      <p class="home-daily-note">1~2월생은 입춘 경계에 따라 띠가 다를 수 있어요. 이 경우 <a href="/saju">사주팔자 계산기</a>에서 확인해주세요.</p>
+    </section>
+
     <section class="content-section popular-section">
       <div class="section-heading-row">
-        <h2 class="section-title">지금 많이 찾는 콘텐츠</h2>
-        <span class="section-note">검색 수요를 반영한 순서</span>
+        <h2 class="section-title">먼저 해볼 만한 콘텐츠</h2>
+        <span class="section-note">검색 관심도와 이용 목적을 함께 반영했어요</span>
       </div>
       <div class="popular-grid">${popularCards}</div>
     </section>
@@ -315,7 +371,7 @@ function renderHome(quizzes, fortuneTools, guides) {
     </section>
 
     <section class="content-section">
-      <h2 class="section-title">🎯 트렌드 테스트</h2>
+      <h2 class="section-title">🎯 가볍게 해보는 테스트</h2>
       <div class="quiz-grid">${quizCards}</div>
     </section>
 
@@ -334,8 +390,8 @@ function renderHome(quizzes, fortuneTools, guides) {
   </main>`;
 
   return baseLayout({
-    title: '무료 사주팔자·오늘의 운세·심리테스트 모음 - 요즘테스트',
-    description: '정식 사주팔자 계산, 오늘의 띠별 운세, 띠 궁합부터 요즘 SNS 화제 심리테스트·밸런스게임까지 한곳에서 무료로.',
+    title: '무료 사주팔자·오늘의 운세·MBTI·심리테스트 - 요즘테스트',
+    description: '사주팔자 계산, 오늘의 띠별 운세, MBTI 16유형과 궁합, 성격·연애 테스트를 회원가입 없이 무료로 이용하세요.',
     ogUrl: `${SITE_URL}/`,
     structuredData: {
       '@context': 'https://schema.org',
@@ -807,12 +863,19 @@ function renderMbtiCompatibilityForm(types, prefillFirst) {
   const formHtml = `
     <form action="/mbti/compatibility/result" method="GET" data-tool-id="mbti_compatibility">
       <div class="mbti-compare-selects">
-        <label>첫 번째 유형<select name="first" required><option value="">유형 선택</option>${options(prefillFirst)}</select></label>
+        <label for="mbti-first">첫 번째 유형<select id="mbti-first" name="first" required><option value="">유형 선택</option>${options(prefillFirst)}</select></label>
         <span class="mbti-compare-mark">×</span>
-        <label>두 번째 유형<select name="second" required><option value="">유형 선택</option>${options()}</select></label>
+        <label for="mbti-second">두 번째 유형<select id="mbti-second" name="second" required><option value="">유형 선택</option>${options()}</select></label>
       </div>
       <button type="submit" class="quiz-btn">두 유형 비교하기</button>
-    </form>`;
+    </form>
+    <div class="friend-invite">
+      <strong>친구 유형을 아직 모른다면</strong>
+      <p>내 유형만 고른 뒤 초대 링크를 보내세요. 친구가 자신의 유형을 선택하면 바로 비교할 수 있어요.</p>
+      <button type="button" id="mbti-invite-btn" class="quiz-btn quiz-btn-outline" data-base-url="${pageUrl}" disabled>내 유형을 담아 초대하기</button>
+      <p id="invite-status" class="action-status" role="status" aria-live="polite"></p>
+    </div>
+    <script src="/js/compat-invite.js"></script>`;
   const extraHtml = `
     <section class="info-card mbti-compat-guide">
       <h2>MBTI 궁합은 어떻게 보나요?</h2>
@@ -869,7 +932,8 @@ function renderMbtiCompatibilityResult(firstCode, first, secondCode, second) {
     accent: '#6657c7', eyebrow: 'MBTI 궁합 비교', emoji: '🤝', titleHtml: `${firstCode} × ${secondCode}`,
     bodyHtml, ogUrl: pageUrl, ogTitle: `${firstCode} ${secondCode} MBTI 궁합·관계 특징 - ${SITE_NAME}`,
     description: `${firstCode}와 ${secondCode}의 대화, 정보 이해, 갈등 해결, 생활 리듬을 네 가지 MBTI 축으로 비교합니다.`,
-    backHref: '/mbti/compatibility', backLabel: '다른 유형 비교하기', structuredData,
+    backHref: '/mbti/compatibility', backLabel: '다른 유형 비교하기', shareUrl: pageUrl,
+    shareText: `${firstCode}와 ${secondCode}의 MBTI 관계 특징을 함께 살펴봐요.`, structuredData,
   });
 }
 
@@ -962,6 +1026,7 @@ function renderQuizPage(quiz) {
 function renderResultPage(quiz, resultKey, matchScore) {
   const result = quiz.results[resultKey];
   const shareUrl = `${SITE_URL}/q/${quiz.id}/r/${resultKey}`;
+  const shareLink = trackedShareUrl(shareUrl);
   const structuredData = [
     {
       '@context': 'https://schema.org',
@@ -1012,11 +1077,12 @@ function renderResultPage(quiz, resultKey, matchScore) {
       </details>
 
       <div class="result-actions">
-        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareUrl)}" data-text="${escapeHtml(result.shareText)}">
-          링크 복사해서 공유하기
+        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareLink)}" data-text="${escapeHtml(result.shareText)}" data-share-id="/q/${escapeHtml(quiz.id)}/r/${escapeHtml(resultKey)}">
+          결과 공유하기
         </button>
         <a href="/q/${quiz.id}" class="quiz-btn quiz-btn-outline">다시 테스트하기</a>
       </div>
+      <p id="share-status" class="action-status" role="status" aria-live="polite"></p>
     </section>
 
 
@@ -1044,7 +1110,7 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => h);
 
 function renderSajuForm({ error } = {}) {
   const yearOptions = [];
-  for (let y = 2026; y >= 1920; y -= 1) yearOptions.push(y);
+  for (let y = currentYearKST(); y >= 1920; y -= 1) yearOptions.push(y);
 
   const faqItems = [
     {
@@ -1376,6 +1442,7 @@ function renderUnseHome() {
   const dateStr = getTodayKST();
   const todayKo = formatTodayKorean(dateStr);
   const todayShort = formatTodayKoreanShort(dateStr);
+  const currentYear = currentYearKST();
 
   const cards = TTI_ORDER.map((key) => {
     const info = TTI_CONTENT[key];
@@ -1393,9 +1460,10 @@ function renderUnseHome() {
     <section class="info-card">
       <h2>내 띠를 빠르게 찾고 싶다면?</h2>
       <p class="tool-desc" style="margin-bottom:14px;">태어난 연도만 입력하면 바로 내 띠의 오늘 운세로 이동해요. (1~2월생은 정확한 계산을 위해 <a href="/saju">사주팔자 계산기</a>를 이용해주세요)</p>
-      <form action="/unse/find" method="GET" data-tool-id="daily_fortune" style="display:flex;gap:8px;">
-        <select name="year" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);font-size:0.95rem;">
-          ${Array.from({ length: 2026 - 1920 + 1 }, (_, i) => 2026 - i)
+      <form action="/unse/find" method="GET" data-tool-id="daily_fortune" data-save-birth-year style="display:flex;gap:8px;">
+        <label for="unse-birth-year" class="sr-only">태어난 연도</label>
+        <select id="unse-birth-year" name="year" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);font-size:0.95rem;">
+          ${Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i)
             .map((y) => `<option value="${y}" ${y === 1994 ? 'selected' : ''}>${y}년생</option>`)
             .join('')}
         </select>
@@ -1451,6 +1519,10 @@ function renderUnseResult(animalKey) {
     <div class="compat-box">
       <p class="result-eyebrow">${info.name}띠는 원래 이런 성향이에요</p>
       <p class="result-desc">${info.desc}</p>
+    </div>
+    <div class="save-preference-panel">
+      <button type="button" class="save-preference-btn" data-save-zodiac="${animalKey}">${info.name}띠로 저장하기</button>
+      <p class="action-status" data-save-status role="status" aria-live="polite">저장하면 다음 방문부터 오늘 운세로 더 빠르게 이동할 수 있어요.</p>
     </div>
     <p class="result-desc" style="margin-top:16px;"><a href="/gunghap?my=${animalKey}">${info.name}띠 궁합 확인하러 가기 →</a></p>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">오늘의 운세는 날짜별로 자동 생성되는 재미 콘텐츠이며 실제 운세를 예측·보장하지 않아요.</p>
@@ -1612,6 +1684,34 @@ function renderGunghapResult(myKey, partnerKey, relation) {
   });
 }
 
+function renderNotFound() {
+  const pageUrl = `${SITE_URL}/404`;
+  const content = `
+  <header class="site-header">
+    <div class="container"><a href="/" class="logo">${SITE_NAME}</a></div>
+  </header>
+  <main class="container not-found-page">
+    <section class="info-card">
+      <p class="result-eyebrow">404</p>
+      <h1>페이지를 찾을 수 없어요</h1>
+      <p>주소가 바뀌었거나 입력이 잘못된 것 같아요. 아래에서 원하는 콘텐츠를 다시 선택해주세요.</p>
+      <div class="not-found-links">
+        <a class="quiz-btn" href="/">홈으로 돌아가기</a>
+        <a class="quiz-btn quiz-btn-outline" href="/mbti/test">MBTI 테스트</a>
+        <a class="quiz-btn quiz-btn-outline" href="/unse">오늘의 운세</a>
+      </div>
+    </section>
+  </main>`;
+  return baseLayout({
+    title: `페이지를 찾을 수 없습니다 - ${SITE_NAME}`,
+    description: '요청한 페이지를 찾을 수 없습니다. 요즘테스트 홈에서 운세, MBTI, 성격 테스트를 다시 찾아보세요.',
+    ogUrl: pageUrl,
+    canonicalUrl: pageUrl,
+    robots: 'noindex, follow',
+    content,
+  });
+}
+
 module.exports = {
   renderHome,
   renderAboutPage,
@@ -1631,6 +1731,7 @@ module.exports = {
   renderGunghapForm,
   renderGunghapResult,
   renderIlganPage,
+  renderNotFound,
   formatTodayKorean,
   SITE_NAME,
   SITE_URL,

@@ -96,12 +96,17 @@ echo ""
 echo "=== 기본 페이지 ==="
 check_status "홈" "$BASE/" 200
 check_contains "홈에 사주·운세 섹션" "$BASE/" "사주"
-check_contains "홈에 트렌드 테스트 섹션" "$BASE/" "트렌드 테스트"
-check_contains "홈에 검색용 H1" "$BASE/" "<h1 class=\"home-title\">무료 사주·운세·심리테스트</h1>"
+check_contains "홈에 테스트 섹션" "$BASE/" "가볍게 해보는 테스트"
+check_contains "홈에 목적 중심 H1" "$BASE/" "지금 궁금한 나를"
 check_contains "홈에 WebSite 구조화데이터" "$BASE/" '"@type":"WebSite"'
 check_contains "홈에 콘텐츠 제작 기준 안내" "$BASE/" "결과는 이렇게 만들어요"
-check_contains "홈에 검색 수요 우선순위 섹션" "$BASE/" "지금 많이 찾는 콘텐츠"
+check_contains "홈에 추천 콘텐츠 섹션" "$BASE/" "먼저 해볼 만한 콘텐츠"
 check_contains "홈 우선순위 카드에 GA4 선택 추적값" "$BASE/" 'data-content-placement="home_priority"'
+check_contains "홈에 관심사별 빠른 탐색" "$BASE/" 'aria-label="관심사별 바로가기"'
+check_contains "홈에 저장형 오늘 운세 폼" "$BASE/" "data-save-birth-year"
+check_contains "홈에 접근성 본문 바로가기" "$BASE/" "본문으로 바로가기"
+check_header_contains "홈 보안 헤더 nosniff" "$BASE/" "X-Content-Type-Options: nosniff"
+check_header_contains "홈 보안 헤더 referrer policy" "$BASE/" "Referrer-Policy: strict-origin-when-cross-origin"
 curl -s "$BASE/" -o /tmp/yozeum_home.html
 priority_order=$(grep -o 'data-priority-rank="[1-6]"' /tmp/yozeum_home.html | tr -cd '1-6')
 if [ "$priority_order" = "123456" ]; then
@@ -124,6 +129,8 @@ check_contains "사주 가이드에 읽는 순서 설명" "$BASE/guides/saju-fir
 check_contains "심리테스트 가이드에 일치율 설명" "$BASE/guides/personality-test-results" "일치율은 선택 횟수를"
 check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
+check_contains "개인정보처리방침 canonical" "$BASE/privacy.html" 'rel="canonical" href="https://yozeum-test.com/privacy.html"'
+check_contains "이용약관 canonical" "$BASE/terms.html" 'rel="canonical" href="https://yozeum-test.com/terms.html"'
 check_status "ads.txt" "$BASE/ads.txt" 200
 check_contains "ads.txt 판매자 레코드" "$BASE/ads.txt" "google.com, pub-8602848692420724, DIRECT, f08c47fec0942fa0"
 check_status "robots.txt" "$BASE/robots.txt" 200
@@ -198,11 +205,14 @@ check_contains "테스트 결과 반대 비율 표시" "$BASE/mbti/type/INFP?ei=
 check_status "MBTI 궁합 선택 폼" "$BASE/mbti/compatibility" 200
 check_contains "MBTI 궁합 폼에 도구 식별값" "$BASE/mbti/compatibility" 'data-tool-id="mbti_compatibility"'
 check_contains "MBTI 궁합에 점수화하지 않는 원칙" "$BASE/mbti/compatibility" "좋고 나쁜 조합을 단정하는 대신"
+check_contains "MBTI 궁합에 친구 초대 기능" "$BASE/mbti/compatibility?first=INFP" "내 유형을 담아 초대하기"
+check_contains "MBTI 친구 초대 스크립트" "$BASE/js/compat-invite.js" "mbti_friend_invite"
 check_redirect_location "MBTI 궁합 계산→정규 결과" "$BASE/mbti/compatibility/result?first=INFP&second=ENFJ" "/mbti/compatibility/ENFJ/INFP"
 check_status "MBTI 궁합 결과" "$BASE/mbti/compatibility/ENFJ/INFP" 200
 check_contains "MBTI 궁합 네 축 비교" "$BASE/mbti/compatibility/ENFJ/INFP" "에너지와 대화 속도"
 check_contains "MBTI 궁합은 예측·점수화하지 않음" "$BASE/mbti/compatibility/ENFJ/INFP" "성공 가능성을 예측하거나 점수화하지 않습니다"
 check_header_contains "MBTI 궁합 조합 결과 색인 제외" "$BASE/mbti/compatibility/ENFJ/INFP" "X-Robots-Tag: noindex, follow"
+check_contains "MBTI 궁합 결과 공유 URL에 유입 식별값" "$BASE/mbti/compatibility/ENFJ/INFP" "utm_campaign=result_share"
 check_status "역순 MBTI 궁합 URL은 정규 URL로 영구 이동" "$BASE/mbti/compatibility/INFP/ENFJ" 301
 check_redirect_location "역순 MBTI 궁합 URL 정규화" "$BASE/mbti/compatibility/INFP/ENFJ" "/mbti/compatibility/ENFJ/INFP"
 
@@ -214,7 +224,12 @@ check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8
 check_contains "퀴즈 페이지에 결과 유형 설명" "$BASE/q/meta-sensing" "어떤 결과 유형이 있나요?"
 check_contains "퀴즈 결과에 채점 설명" "$BASE/q/meta-sensing/r/detective" "이 결과는 어떻게 정해졌나요?"
 check_header_contains "퀴즈 결과 페이지 색인 제외" "$BASE/q/meta-sensing/r/detective" "X-Robots-Tag: noindex, follow"
-check_status "존재하지 않는 퀴즈 → 홈 리다이렉트" "$BASE/q/nope" 302
+check_status "존재하지 않는 퀴즈는 실제 404" "$BASE/q/nope" 404
+check_contains "404 페이지에 검색 제외 메타" "$BASE/q/nope" 'name="robots" content="noindex, follow"'
+check_header_contains "404 페이지에 검색 제외 헤더" "$BASE/q/nope" "X-Robots-Tag: noindex, follow"
+check_status "존재하지 않는 일반 주소는 실제 404" "$BASE/not-a-real-page" 404
+check_status "존재하지 않는 가이드는 실제 404" "$BASE/guides/not-a-guide" 404
+check_status "존재하지 않는 MBTI 유형은 실제 404" "$BASE/mbti/type/XXXX" 404
 
 check_status "Render 기본 주소는 공식 도메인으로 영구 이동" "$BASE/q/meta-sensing" 301 "-HHost:yozeum-test.onrender.com"
 check_redirect_location "Render 기본 주소 리다이렉트 목적지" "$BASE/q/meta-sensing" "https://yozeum-test.com/q/meta-sensing" "-HHost:yozeum-test.onrender.com"
@@ -246,9 +261,10 @@ check_status "신규 퀴즈도 일치율 결합 정상 동작" "$BASE/q/past-lif
 check_contains "신규 퀴즈 결과에도 일치율 표시" "$BASE/q/past-life/r/mystic?s=73" "73%"
 
 echo ""
-echo "=== 신규: 테토 에겐 유형 테스트 ==="
-check_status "테토 에겐 테스트 페이지" "$BASE/q/teto-egen" 200
-check_contains "홈에 테토 에겐 카드 노출" "$BASE/" "테토 에겐 유형 테스트"
+echo "=== 신규: 테토·에겐 유형 테스트 ==="
+check_status "테토·에겐 테스트 페이지" "$BASE/q/teto-egen" 200
+check_contains "홈에 테토·에겐 카드 노출" "$BASE/" "테토·에겐 유형 테스트"
+check_contains "테토·에겐의 한계 안내" "$BASE/q/teto-egen" "호르몬 수치를 측정하는 검사가 아니라"
 check_status "결과(테토형)" "$BASE/q/teto-egen/r/teto" 200
 check_contains "테토형 결과에 유형명 노출" "$BASE/q/teto-egen/r/teto" "테토형"
 check_status "결과(에겐형)" "$BASE/q/teto-egen/r/egen" 200
@@ -297,11 +313,11 @@ check_status "2026년생" "$BASE/saju/r/2026/6/15/unknown" 200
 echo "--- 잘못된 날짜(2월 30일) 처리 ---"
 check_status "compute 단계에서 캘린더상 존재 안하는 날짜 차단(폼+에러문구, 200)" "$BASE/saju/compute?year=2000&month=2&day=30&hour=unknown" 200
 check_contains "에러 문구 노출" "$BASE/saju/compute?year=2000&month=2&day=30&hour=unknown" "생년월일을 다시 확인해주세요"
-check_status "딥링크로 우회 시도해도 크래시 없이 폼으로 리다이렉트" "$BASE/saju/r/2000/2/30/unknown" 302
+check_status "잘못된 날짜 딥링크는 실제 404" "$BASE/saju/r/2000/2/30/unknown" 404
 
 echo "--- 잘못된 입력 방어 ---"
 check_status "범위 밖 연도(1800) → 폼으로" "$BASE/saju/compute?year=1800&month=1&day=1&hour=unknown" 200
-check_status "시간 파라미터 조작(abc) → 홈/폼 리다이렉트" "$BASE/saju/r/1990/5/20/abc" 302
+check_status "시간 파라미터 조작(abc)은 실제 404" "$BASE/saju/r/1990/5/20/abc" 404
 
 echo ""
 echo "=== 오늘의 띠별 운세 ==="
@@ -310,8 +326,11 @@ for a in rat ox tiger rabbit dragon snake horse goat monkey rooster dog pig; do
   check_status "운세 개별 페이지: $a" "$BASE/unse/$a" 200
 done
 check_contains "운세 홈에 12띠 모두 노출" "$BASE/unse" "쥐띠"
+check_contains "운세 홈에 출생연도 저장 기능" "$BASE/unse" "data-save-birth-year"
+check_contains "운세 결과에 띠 저장 기능" "$BASE/unse/rat" 'data-save-zodiac="rat"'
+check_contains "선호 저장 스크립트는 로컬 저장소 사용" "$BASE/js/preferences.js" "window.localStorage"
 check_redirect_location "연도로 띠 찾기(1990→午=말띠)" "$BASE/unse/find?year=1990" "/unse/horse"
-check_status "잘못된 띠 파라미터 → 홈 리다이렉트" "$BASE/unse/notanaimal" 302
+check_status "잘못된 띠 파라미터는 실제 404" "$BASE/unse/notanaimal" 404
 
 echo ""
 echo "=== 띠 궁합 ==="
@@ -326,7 +345,7 @@ check_contains "평범한 관계 판정(무관계 쌍)" "$BASE/gunghap/r/rat/tig
 check_header_contains "궁합 결과 페이지 색인 제외" "$BASE/gunghap/r/rat/tiger" "X-Robots-Tag: noindex, follow"
 check_status "역순 궁합 URL은 정규 URL로 영구 리다이렉트" "$BASE/gunghap/r/horse/tiger" 301
 check_redirect_location "역순 궁합 URL 정규화" "$BASE/gunghap/r/horse/tiger" "/gunghap/r/tiger/horse"
-check_status "잘못된 띠 파라미터 → 폼 리다이렉트" "$BASE/gunghap/r/xxx/yyy" 302
+check_status "잘못된 띠 파라미터는 실제 404" "$BASE/gunghap/r/xxx/yyy" 404
 
 echo ""
 echo "=== 일간(日干) 랜딩 페이지 ==="
@@ -335,12 +354,21 @@ for k in gap eul byeong jeong mu gi gyeong sin im gye; do
 done
 check_contains "갑목 페이지에 오행 성격 노출" "$BASE/ilgan/gap" "갑목"
 check_contains "갑목 페이지에 다른 일간 링크그리드" "$BASE/ilgan/gap" "link-grid"
-check_status "잘못된 일간 키 → /saju로 리다이렉트" "$BASE/ilgan/notakey" 302
+check_status "잘못된 일간 키는 실제 404" "$BASE/ilgan/notakey" 404
 
 echo ""
 echo "=== 내부 링크 그리드(폼 화면) ==="
 check_contains "사주 폼에 일간별 링크그리드" "$BASE/saju" "link-grid"
 check_contains "궁합 폼에 인기 조합 링크그리드" "$BASE/gunghap" "link-grid"
+
+echo ""
+echo "=== 공유·개인정보·정적 자원 보호 ==="
+check_contains "공유 URL에 캠페인 식별값" "$BASE/q/meta-sensing/r/detective" "utm_campaign=result_share"
+check_contains "공유 이벤트는 GA4 권장 share 이름 사용" "$BASE/js/result-share.js" "'event', 'share'"
+check_contains "공유 취소는 복사로 오인 처리하지 않음" "$BASE/js/result-share.js" "AbortError"
+check_contains "개인정보처리방침에 로컬 저장 안내" "$BASE/privacy.html" "브라우저의 로컬 저장소"
+for i in $(seq 1 305); do curl -s -o /dev/null "$BASE/css/style.css"; done
+check_status "정적 파일 반복 요청이 페이지 제한량을 소모하지 않음" "$BASE/about" 200
 
 echo ""
 echo "=== 네이버 서치어드바이저 검증 태그 (env 미설정 시 노출 안함) ==="
