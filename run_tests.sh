@@ -101,6 +101,7 @@ check_contains "홈에 검색용 H1" "$BASE/" "<h1 class=\"home-title\">무료 �
 check_contains "홈에 WebSite 구조화데이터" "$BASE/" '"@type":"WebSite"'
 check_contains "홈에 콘텐츠 제작 기준 안내" "$BASE/" "결과는 이렇게 만들어요"
 check_contains "홈에 검색 수요 우선순위 섹션" "$BASE/" "지금 많이 찾는 콘텐츠"
+check_contains "홈 우선순위 카드에 GA4 선택 추적값" "$BASE/" 'data-content-placement="home_priority"'
 curl -s "$BASE/" -o /tmp/yozeum_home.html
 priority_order=$(grep -o 'data-priority-rank="[1-6]"' /tmp/yozeum_home.html | tr -cd '1-6')
 if [ "$priority_order" = "123456" ]; then
@@ -181,6 +182,8 @@ check_contains "MBTI 허브 CollectionPage 구조화데이터" "$BASE/mbti" '"@t
 check_status "MBTI 20문항 테스트" "$BASE/mbti/test" 200
 check_contains "MBTI 테스트 문항 수 안내" "$BASE/mbti/test" "총 20개 문항"
 check_contains "MBTI 테스트 클라이언트 스크립트" "$BASE/mbti/test" "/js/mbti-test.js"
+check_contains "MBTI 시작 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_start"
+check_contains "MBTI 완료 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_complete"
 for type in ISTJ ISFJ INFJ INTJ ISTP ISFP INFP INTP ESTP ESFP ENFP ENTP ESTJ ESFJ ENFJ ENTJ; do
   check_status "MBTI 유형 페이지: $type" "$BASE/mbti/type/$type" 200
 done
@@ -193,6 +196,7 @@ check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" 
 check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "E 20%"
 check_contains "테스트 결과 반대 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "80% I"
 check_status "MBTI 궁합 선택 폼" "$BASE/mbti/compatibility" 200
+check_contains "MBTI 궁합 폼에 도구 식별값" "$BASE/mbti/compatibility" 'data-tool-id="mbti_compatibility"'
 check_contains "MBTI 궁합에 점수화하지 않는 원칙" "$BASE/mbti/compatibility" "좋고 나쁜 조합을 단정하는 대신"
 check_redirect_location "MBTI 궁합 계산→정규 결과" "$BASE/mbti/compatibility/result?first=INFP&second=ENFJ" "/mbti/compatibility/ENFJ/INFP"
 check_status "MBTI 궁합 결과" "$BASE/mbti/compatibility/ENFJ/INFP" 200
