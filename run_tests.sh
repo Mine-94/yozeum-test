@@ -131,6 +131,10 @@ check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
 check_contains "개인정보처리방침 canonical" "$BASE/privacy.html" 'rel="canonical" href="https://yozeum-test.com/privacy.html"'
 check_contains "이용약관 canonical" "$BASE/terms.html" 'rel="canonical" href="https://yozeum-test.com/terms.html"'
+check_status "확장자 없는 개인정보 주소는 정규 URL로 영구 이동" "$BASE/privacy" 301
+check_redirect_location "개인정보 주소 정규화" "$BASE/privacy" "/privacy.html"
+check_status "확장자 없는 약관 주소는 정규 URL로 영구 이동" "$BASE/terms" 301
+check_redirect_location "약관 주소 정규화" "$BASE/terms" "/terms.html"
 check_status "ads.txt" "$BASE/ads.txt" 200
 check_contains "ads.txt 판매자 레코드" "$BASE/ads.txt" "google.com, pub-8602848692420724, DIRECT, f08c47fec0942fa0"
 check_status "robots.txt" "$BASE/robots.txt" 200
@@ -222,6 +226,8 @@ check_status "퀴즈 페이지" "$BASE/q/meta-sensing" 200
 check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
 check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8개 문항"
 check_contains "퀴즈 페이지에 결과 유형 설명" "$BASE/q/meta-sensing" "어떤 결과 유형이 있나요?"
+check_contains "퀴즈 페이지에 고유 해석 가이드" "$BASE/q/meta-sensing" "감정이 생긴 순간을 알아차리는지"
+check_contains "밸런스게임 제목과 실제 문항 수 일치" "$BASE/q/balance-game" "총 20개 문항"
 check_contains "퀴즈 결과에 채점 설명" "$BASE/q/meta-sensing/r/detective" "이 결과는 어떻게 정해졌나요?"
 check_header_contains "퀴즈 결과 페이지 색인 제외" "$BASE/q/meta-sensing/r/detective" "X-Robots-Tag: noindex, follow"
 check_status "존재하지 않는 퀴즈는 실제 404" "$BASE/q/nope" 404
@@ -230,6 +236,14 @@ check_header_contains "404 페이지에 검색 제외 헤더" "$BASE/q/nope" "X-
 check_status "존재하지 않는 일반 주소는 실제 404" "$BASE/not-a-real-page" 404
 check_status "존재하지 않는 가이드는 실제 404" "$BASE/guides/not-a-guide" 404
 check_status "존재하지 않는 MBTI 유형은 실제 404" "$BASE/mbti/type/XXXX" 404
+
+if node -e "for (const q of require('./data/quizzes')) for (const item of q.questions) { const texts=item.options.map(o=>o.text); if (texts.length < 2 || texts.length > 4 || new Set(texts).size !== texts.length) process.exit(1); }"; then
+  echo "PASS  모든 테스트 문항의 선택지 수·중복 검증"
+  pass=$((pass+1))
+else
+  echo "FAIL  선택지 수가 잘못되었거나 중복 문구가 있는 테스트 문항 발견"
+  fail=$((fail+1))
+fi
 
 check_status "Render 기본 주소는 공식 도메인으로 영구 이동" "$BASE/q/meta-sensing" 301 "-HHost:yozeum-test.onrender.com"
 check_redirect_location "Render 기본 주소 리다이렉트 목적지" "$BASE/q/meta-sensing" "https://yozeum-test.com/q/meta-sensing" "-HHost:yozeum-test.onrender.com"
@@ -328,6 +342,7 @@ done
 check_contains "운세 홈에 12띠 모두 노출" "$BASE/unse" "쥐띠"
 check_contains "운세 홈에 출생연도 저장 기능" "$BASE/unse" "data-save-birth-year"
 check_contains "운세 결과에 띠 저장 기능" "$BASE/unse/rat" 'data-save-zodiac="rat"'
+check_contains "운세 결과에 띠별 고유 활용 가이드" "$BASE/unse/rat" "필요한 정보와 비용부터"
 check_contains "선호 저장 스크립트는 로컬 저장소 사용" "$BASE/js/preferences.js" "window.localStorage"
 check_redirect_location "연도로 띠 찾기(1990→午=말띠)" "$BASE/unse/find?year=1990" "/unse/horse"
 check_status "잘못된 띠 파라미터는 실제 404" "$BASE/unse/notanaimal" 404
@@ -335,6 +350,8 @@ check_status "잘못된 띠 파라미터는 실제 404" "$BASE/unse/notanaimal" 
 echo ""
 echo "=== 띠 궁합 ==="
 check_status "궁합 폼" "$BASE/gunghap" 200
+check_contains "궁합 폼에 계산 원리 설명" "$BASE/gunghap" "띠 궁합은 어떻게 계산하나요?"
+check_contains "궁합 폼에 점수를 만들지 않는 원칙" "$BASE/gunghap" "임의의 퍼센트를 만들거나"
 check_redirect_location "compute→결과 리다이렉트" "$BASE/gunghap/compute?my=tiger&partner=horse" "/gunghap/r/tiger/horse"
 check_contains "인오술 삼합 관계 판정" "$BASE/gunghap/r/tiger/horse" "삼합"
 check_contains "자오 충 관계 판정" "$BASE/gunghap/r/rat/horse" "충"

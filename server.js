@@ -89,6 +89,15 @@ app.get('/about', (req, res) => {
   res.send(renderAboutPage());
 });
 
+// 주소창에 확장자 없이 입력해도 기존 정규 URL로 안전하게 연결합니다.
+app.get('/privacy', (req, res) => {
+  res.redirect(301, '/privacy.html');
+});
+
+app.get('/terms', (req, res) => {
+  res.redirect(301, '/terms.html');
+});
+
 app.get('/guides', (req, res) => {
   res.send(renderGuidesHome(guides));
 });

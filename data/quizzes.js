@@ -332,7 +332,7 @@ const quizzes = [
     subtitle: '둘 중 하나만 고를 수 있다면? 선택으로 알아보는 나의 결정 스타일',
     emoji: '⚖️',
     themeColor: '#feca57',
-    intro: '고민할 필요 없이 직관적으로 골라보세요. 8개 밸런스게임으로 나의 결정 스타일을 확인합니다.',
+    intro: '고민할 필요 없이 직관적으로 골라보세요. 20개 밸런스게임으로 익숙함과 새로움 사이에서 내가 주로 어떤 결정을 내리는지 살펴봅니다.',
     questions: [
       {
         text: '평생 여름만 vs 평생 겨울만',
@@ -388,6 +388,90 @@ const quizzes = [
         options: [
           { text: '실패 확률 0% 평범한 계획', type: 'safe' },
           { text: '실패 확률 50% 인생역전 계획', type: 'bold' },
+        ],
+      },
+      {
+        text: '익숙한 동네에서 오래 살기 vs 몇 년마다 새로운 도시로 이사하기',
+        options: [
+          { text: '익숙한 동네에서 오래 살기', type: 'safe' },
+          { text: '새로운 도시로 이사하기', type: 'bold' },
+        ],
+      },
+      {
+        text: '후기가 검증된 메뉴 주문하기 vs 처음 보는 신메뉴 주문하기',
+        options: [
+          { text: '검증된 메뉴 주문하기', type: 'safe' },
+          { text: '처음 보는 신메뉴 주문하기', type: 'bold' },
+        ],
+      },
+      {
+        text: '필요한 물건 하나를 좋은 제품으로 사기 vs 같은 예산으로 여러 제품 경험하기',
+        options: [
+          { text: '좋은 제품 하나 사기', type: 'safe' },
+          { text: '여러 제품 경험하기', type: 'bold' },
+        ],
+      },
+      {
+        text: '오랫동안 잘하는 취미 이어가기 vs 완전히 새로운 취미 시작하기',
+        options: [
+          { text: '잘하는 취미 이어가기', type: 'safe' },
+          { text: '새로운 취미 시작하기', type: 'bold' },
+        ],
+      },
+      {
+        text: '매달 일정 금액 저축하기 vs 경험을 위해 지금 충분히 쓰기',
+        options: [
+          { text: '일정 금액 저축하기', type: 'safe' },
+          { text: '경험을 위해 지금 쓰기', type: 'bold' },
+        ],
+      },
+      {
+        text: '정해진 역할이 분명한 팀 vs 역할을 자유롭게 바꾸는 팀',
+        options: [
+          { text: '역할이 분명한 팀', type: 'safe' },
+          { text: '역할을 바꾸는 팀', type: 'bold' },
+        ],
+      },
+      {
+        text: '약속 장소에 20분 일찍 도착하기 vs 시간에 맞춰 아슬아슬하게 도착하기',
+        options: [
+          { text: '20분 일찍 도착하기', type: 'safe' },
+          { text: '시간에 맞춰 도착하기', type: 'bold' },
+        ],
+      },
+      {
+        text: '결말을 조금 알고 작품 보기 vs 아무 정보 없이 작품 보기',
+        options: [
+          { text: '결말을 조금 알고 보기', type: 'safe' },
+          { text: '아무 정보 없이 보기', type: 'bold' },
+        ],
+      },
+      {
+        text: '모든 기능을 익힌 휴대폰 유지하기 vs 새 운영체제의 휴대폰으로 바꾸기',
+        options: [
+          { text: '익숙한 휴대폰 유지하기', type: 'safe' },
+          { text: '새 운영체제로 바꾸기', type: 'bold' },
+        ],
+      },
+      {
+        text: '여행 전 동선을 모두 저장하기 vs 그날 기분에 따라 걷기',
+        options: [
+          { text: '동선을 모두 저장하기', type: 'safe' },
+          { text: '기분에 따라 걷기', type: 'bold' },
+        ],
+      },
+      {
+        text: '확실히 성공할 작은 목표 vs 어렵지만 크게 성장할 목표',
+        options: [
+          { text: '확실한 작은 목표', type: 'safe' },
+          { text: '어려운 성장 목표', type: 'bold' },
+        ],
+      },
+      {
+        text: '지금의 생활 리듬을 안정적으로 유지하기 vs 큰 변화를 한 번 시도하기',
+        options: [
+          { text: '생활 리듬 유지하기', type: 'safe' },
+          { text: '큰 변화 시도하기', type: 'bold' },
         ],
       },
     ],

@@ -937,9 +937,51 @@ function renderMbtiCompatibilityResult(firstCode, first, secondCode, second) {
   });
 }
 
-// --- 트렌드 테스트 (기존) ---
+// 각 테스트가 무엇을 보고 어떻게 읽어야 하는지 별도로 설명합니다.
+// 문항과 결과만 있는 얇은 화면을 피하고, 사용자가 결과를 오해하지 않도록 테스트별 한계를 함께 밝힙니다.
+const QUIZ_EDITORIAL = {
+  'meta-sensing': {
+    focus: '감정이 생긴 순간을 알아차리는지, 원인을 말로 정리하는지, 표현하거나 혼자 삭이는지, 다시 균형을 찾을 때 어떤 행동을 택하는지를 함께 봅니다. 감정이 크고 작다는 기준보다 자신에게 익숙한 처리 방식을 찾는 데 초점을 맞췄어요.',
+    reading: '가장 많이 선택한 유형은 최근의 주된 반응을 보여줄 뿐, 감정 조절 능력의 높고 낮음을 평가하지 않습니다. 결과에서 낯익은 장면 하나를 골라 “다음에는 어떻게 반응하고 싶은가”까지 생각해보면 더 유용합니다.',
+  },
+  'long-flight': {
+    focus: '준비와 즉흥성, 이동 중 회복 방식, 낯선 사람과의 거리, 일정이 틀어졌을 때의 대응을 장거리 비행이라는 한정된 상황에 담았습니다. 여행 계획을 세울 때 무엇을 먼저 챙기는지 돌아보기 위한 테스트예요.',
+    reading: '비행 경험, 동행자, 컨디션에 따라 답은 달라질 수 있습니다. 결과를 고정된 여행 성격으로 보기보다 다음 여행에서 필요한 준비물과 일정 밀도를 조절하는 참고로 활용해주세요.',
+  },
+  'vibe-shift': {
+    focus: '최근의 약속, 스트레스 해소, SNS 사용, 주말과 인간관계가 예전과 어떻게 달라졌는지를 묻습니다. 성격 자체가 바뀌었는지 단정하기보다 지금의 생활 리듬이 어느 방향으로 움직이는지 살펴봅니다.',
+    reading: '최근 몇 주간 큰 일정이나 환경 변화가 있었다면 그 영향이 결과에 크게 반영될 수 있습니다. 세 달쯤 뒤 다시 해보고 같은 선택이 이어지는지 비교하면 일시적인 변화와 새로운 습관을 구분하기 쉬워요.',
+  },
+  'balance-game': {
+    focus: '일, 소비, 여행, 관계와 생활 습관에서 익숙하고 예측 가능한 선택과 새롭고 불확실한 선택 중 어디에 더 자주 마음이 가는지 20개 장면으로 비교합니다. 정답을 찾기보다 망설임 끝에 남는 쪽을 고르는 방식입니다.',
+    reading: '두 선택지만 제시하는 밸런스게임은 실제 삶의 다양한 조건을 단순하게 줄여 보여줍니다. 안정추구형과 도전추구형 중 어느 쪽이 더 낫다는 의미는 아니며, 중요한 결정을 대신하는 결과로 사용해서는 안 됩니다.',
+  },
+  'past-life': {
+    focus: '정보를 모으는 방식, 사람 사이에서 맡는 역할, 갈등을 푸는 방법과 중요하게 여기는 가치를 옛이야기 속 네 역할에 빗대어 보여줍니다. 현재의 선택 성향을 조금 다른 언어로 바라보는 창작형 놀이입니다.',
+    reading: '결과는 실제 전생이나 초자연적 사실을 판정하지 않습니다. 책사·거상·예인·도인은 선택의 특징을 기억하기 쉽게 만든 비유이며, 마음에 맞는 장점과 보완점을 가볍게 골라 읽으면 충분해요.',
+  },
+  'love-style': {
+    focus: '호감 표현, 연락 속도, 데이트 준비, 갈등 이후의 대화, 배려와 개인 공간을 다루는 방식을 살펴봅니다. 연애를 잘하고 못한다는 평가가 아니라 관계에서 반복하기 쉬운 행동을 발견하는 데 목적이 있습니다.',
+    reading: '상대와 관계의 단계에 따라 누구나 다른 모습을 보일 수 있습니다. 결과가 현재 관계와 맞지 않는다면 유형에 상대를 끼워 맞추기보다 서로 편한 연락 빈도와 갈등 해결 방식을 대화해보세요.',
+  },
+  'teto-egen': {
+    focus: '온라인에서 쓰이는 ‘테토·에겐’ 표현을 행동의 주도성, 감정 표현, 관계 속 속도와 분위기라는 일상적인 선택으로 풀었습니다. 성별이나 외모를 판정하지 않고 두 경향 중 최근 어느 쪽이 더 익숙한지만 살펴봅니다.',
+    reading: '테토와 에겐은 학술적인 성격 분류나 의학적 개념이 아닙니다. 상황에 따라 두 모습이 함께 나타날 수 있으므로 결과를 정체성이나 능력의 기준으로 삼지 말고, 재미있는 대화 소재로만 활용해주세요.',
+  },
+};
+
+// --- 트렌드 테스트 ---
 function renderQuizPage(quiz) {
   const quizUrl = `${SITE_URL}/q/${quiz.id}`;
+  const editorial = QUIZ_EDITORIAL[quiz.id];
+  const editorialHtml = editorial
+    ? `<section class="info-card quiz-editorial">
+        <h2>이 테스트는 무엇을 살펴보나요?</h2>
+        <p>${escapeHtml(editorial.focus)}</p>
+        <h2>결과는 이렇게 읽어주세요</h2>
+        <p>${escapeHtml(editorial.reading)}</p>
+      </section>`
+    : '';
   const structuredData = [
     {
       '@context': 'https://schema.org',
@@ -1006,6 +1048,8 @@ function renderQuizPage(quiz) {
         <div id="options-list" class="quiz-options"></div>
       </div>
     </section>
+
+    ${editorialHtml}
 
   </main>
 
@@ -1520,6 +1564,11 @@ function renderUnseResult(animalKey) {
       <p class="result-eyebrow">${info.name}띠는 원래 이런 성향이에요</p>
       <p class="result-desc">${info.desc}</p>
     </div>
+    <section class="info-card fortune-reading-guide">
+      <h2>오늘 운세를 생활에 적용한다면</h2>
+      <p>${escapeHtml(info.dailyFocus)}</p>
+      <p>네 가지 운세 가운데 지금 상황과 가까운 문장만 골라 가볍게 참고해보세요. 맞지 않는 해석까지 억지로 적용할 필요는 없습니다.</p>
+    </section>
     <div class="save-preference-panel">
       <button type="button" class="save-preference-btn" data-save-zodiac="${animalKey}">${info.name}띠로 저장하기</button>
       <p class="action-status" data-save-status role="status" aria-live="polite">저장하면 다음 방문부터 오늘 운세로 더 빠르게 이동할 수 있어요.</p>
@@ -1568,7 +1617,7 @@ function renderUnseResult(animalKey) {
 }
 
 // --- 띠 궁합 ---
-// 폼 화면에 노출할 인기 조합 예시(전체 144쌍은 sitemap에만 반영, 폼에는 대표 8쌍만 노출)
+// 조합 결과는 색인하지 않고, 폼에서는 사용자가 바로 비교해볼 대표 예시만 보여줍니다.
 const GUNGHAP_FEATURED = [
   ['tiger', 'horse'],
   ['rat', 'ox'],
@@ -1615,6 +1664,16 @@ function renderGunghapForm({ prefillMy } = {}) {
     </div>
   `;
 
+  const extraHtml = `
+    <section class="info-card">
+      <h2>띠 궁합은 어떻게 계산하나요?</h2>
+      <p>두 사람의 띠를 십이지 순서로 바꾼 뒤, 전통 명리학에서 함께 묶어 보는 삼합·육합과 서로 마주 보는 충 관계에 해당하는지 확인합니다. 같은 띠는 별도로 표시하고, 어느 관계에도 해당하지 않으면 평범한 관계로 설명합니다.</p>
+      <p>이 도구는 임의의 퍼센트를 만들거나 두 사람의 관계를 좋고 나쁨으로 순위 매기지 않습니다. 띠 하나만으로는 태어난 날짜와 시간, 각자의 경험과 대화 방식을 알 수 없기 때문이에요.</p>
+      <h2>결과를 활용하는 방법</h2>
+      <p>편한 점과 부딪히기 쉬운 점을 대화의 출발점으로만 사용해주세요. 특히 1~2월생은 입춘 전후에 따라 일반적인 출생연도 기준 띠와 사주에서 사용하는 띠가 달라질 수 있으므로, 정확한 확인이 필요하면 사주팔자 계산기를 이용하는 편이 좋습니다.</p>
+      <p class="disclaimer">명리학의 상징 체계를 설명하는 재미 콘텐츠이며 관계의 성공, 결혼 생활 또는 미래를 예측하지 않습니다.</p>
+    </section>`;
+
   return formPageShell({
     accent: '#b0473e',
     emoji: '🤝',
@@ -1623,6 +1682,7 @@ function renderGunghapForm({ prefillMy } = {}) {
     formHtml,
     ogUrl: `${SITE_URL}/gunghap`,
     description: '무료로 두 띠를 선택하면 삼합·육합·충 등 명리학의 지지 관계 이론으로 궁합을 확인할 수 있어요.',
+    extraHtml,
   });
 }
 
