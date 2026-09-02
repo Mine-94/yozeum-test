@@ -41,14 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
       tf: String(pct('T', 'F')),
       jp: String(pct('J', 'P')),
     });
-    track('mbti_complete', { result_type: type });
-    window.location.href = `/mbti/type/${type}?${params.toString()}`;
+    let redirected = false;
+    const redirect = () => {
+      if (redirected) return;
+      redirected = true;
+      window.location.href = `/mbti/type/${type}?${params.toString()}`;
+    };
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'quiz_complete', {
+        quiz_id: 'mbti',
+        result_type: type,
+        event_callback: redirect,
+        event_timeout: 800,
+      });
+      window.setTimeout(redirect, 900);
+    } else {
+      redirect();
+    }
   }
 
   start.addEventListener('click', () => {
     intro.hidden = true;
     play.hidden = false;
-    track('mbti_start');
+    track('quiz_start', { quiz_id: 'mbti' });
     render();
   });
   left.addEventListener('click', () => choose(questions[index].left));
