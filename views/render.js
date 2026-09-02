@@ -107,16 +107,40 @@ ${GA_MEASUREMENT_ID ? `<script>
   document.addEventListener('submit', function (event) {
     var form = event.target;
     if (!form || form.tagName !== 'FORM') return;
+    var toolId = form.getAttribute('data-tool-id') || form.getAttribute('action') || window.location.pathname;
     track('tool_submit', {
+      tool_id: toolId,
       tool_path: form.getAttribute('action') || window.location.pathname,
     });
+    try { window.sessionStorage.setItem('yozeum_pending_tool', toolId); } catch (error) {}
   });
 
   document.addEventListener('click', function (event) {
     var link = event.target.closest && event.target.closest('a[href]');
-    if (!link || link.origin === window.location.origin) return;
-    track('outbound_click', { link_url: link.href });
+    if (!link) return;
+    if (link.origin !== window.location.origin) {
+      track('outbound_click', { link_url: link.href });
+      return;
+    }
+    if (link.hasAttribute('data-content-id')) {
+      var rank = Number(link.getAttribute('data-content-rank'));
+      track('select_content', {
+        content_type: link.getAttribute('data-content-type') || 'internal_content',
+        content_id: link.getAttribute('data-content-id'),
+        content_placement: link.getAttribute('data-content-placement') || 'unknown',
+        content_rank: Number.isFinite(rank) ? rank : 0,
+        destination_path: link.pathname,
+      });
+    }
   });
+
+  try {
+    var completedTool = window.sessionStorage.getItem('yozeum_pending_tool');
+    if (completedTool) {
+      window.sessionStorage.removeItem('yozeum_pending_tool');
+      track('tool_complete', { tool_id: completedTool, destination_path: window.location.pathname });
+    }
+  } catch (error) {}
 })();
 </script>` : ''}
 <script>
@@ -214,7 +238,7 @@ function renderHome(quizzes, fortuneTools, guides) {
   const fortuneCards = fortuneTools
     .map(
       (t) => `
-      <a href="${t.href}" class="quiz-card" style="--accent:${t.themeColor}">
+      <a href="${t.href}" class="quiz-card" style="--accent:${t.themeColor}" data-content-id="${escapeHtml(t.href)}" data-content-type="fortune_tool" data-content-placement="home_fortune">
         <div class="quiz-card-badge">${t.emoji}</div>
         <h2>${escapeHtml(t.title)}</h2>
         <p>${escapeHtml(t.subtitle)}</p>
@@ -226,7 +250,7 @@ function renderHome(quizzes, fortuneTools, guides) {
   const quizCards = quizzes
     .map(
       (q) => `
-      <a href="/q/${q.id}" class="quiz-card" style="--accent:${q.themeColor}">
+      <a href="/q/${q.id}" class="quiz-card" style="--accent:${q.themeColor}" data-content-id="${escapeHtml(q.id)}" data-content-type="personality_quiz" data-content-placement="home_quiz">
         <div class="quiz-card-badge">${q.emoji}</div>
         <h2>${escapeHtml(q.title)}</h2>
         <p>${escapeHtml(q.subtitle)}</p>
@@ -238,7 +262,7 @@ function renderHome(quizzes, fortuneTools, guides) {
   const guideCards = guides
     .map(
       (guide) => `
-      <a href="/guides/${guide.slug}" class="guide-card">
+      <a href="/guides/${guide.slug}" class="guide-card" data-content-id="${escapeHtml(guide.slug)}" data-content-type="guide" data-content-placement="home_guide">
         <span class="guide-card-label">요즘테스트 가이드</span>
         <h3>${escapeHtml(guide.title)}</h3>
         <p>${escapeHtml(guide.description)}</p>
@@ -257,7 +281,7 @@ function renderHome(quizzes, fortuneTools, guides) {
   ]
     .map(
       (item) => `
-      <a href="${item.href}" class="popular-card" data-priority-rank="${item.rank}">
+      <a href="${item.href}" class="popular-card" data-priority-rank="${item.rank}" data-content-rank="${item.rank}" data-content-id="${escapeHtml(item.href)}" data-content-type="priority_content" data-content-placement="home_priority">
         <span class="popular-rank">${item.rank}</span>
         <span class="popular-emoji">${item.emoji}</span>
         <span class="popular-copy"><strong>${item.title}</strong><small>${item.text}</small></span>
@@ -781,7 +805,7 @@ function renderMbtiCompatibilityForm(types, prefillFirst) {
     .map(([code, type]) => `<option value="${code}"${selected === code ? ' selected' : ''}>${code} · ${escapeHtml(type.name)}</option>`)
     .join('');
   const formHtml = `
-    <form action="/mbti/compatibility/result" method="GET">
+    <form action="/mbti/compatibility/result" method="GET" data-tool-id="mbti_compatibility">
       <div class="mbti-compare-selects">
         <label>첫 번째 유형<select name="first" required><option value="">유형 선택</option>${options(prefillFirst)}</select></label>
         <span class="mbti-compare-mark">×</span>
@@ -1075,7 +1099,7 @@ function renderSajuForm({ error } = {}) {
   const formHtml = `
     <p class="tool-desc">태어난 양력 연·월·일과 출생시간을 입력하면 절기(입춘 등) 경계를 반영해 년주·월주·일주·시주와 오행 분포를 계산합니다. 시각을 모르면 년·월·일주만 확인할 수 있어요.</p>
     ${error ? `<p class="form-error">${escapeHtml(error)}</p>` : ''}
-    <form action="/saju/compute" method="GET">
+    <form action="/saju/compute" method="GET" data-tool-id="saju">
       <div class="form-row">
         <label for="year">태어난 연도(양력)</label>
         <select name="year" id="year" required>
@@ -1369,7 +1393,7 @@ function renderUnseHome() {
     <section class="info-card">
       <h2>내 띠를 빠르게 찾고 싶다면?</h2>
       <p class="tool-desc" style="margin-bottom:14px;">태어난 연도만 입력하면 바로 내 띠의 오늘 운세로 이동해요. (1~2월생은 정확한 계산을 위해 <a href="/saju">사주팔자 계산기</a>를 이용해주세요)</p>
-      <form action="/unse/find" method="GET" style="display:flex;gap:8px;">
+      <form action="/unse/find" method="GET" data-tool-id="daily_fortune" style="display:flex;gap:8px;">
         <select name="year" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);font-size:0.95rem;">
           ${Array.from({ length: 2026 - 1920 + 1 }, (_, i) => 2026 - i)
             .map((y) => `<option value="${y}" ${y === 1994 ? 'selected' : ''}>${y}년생</option>`)
@@ -1493,7 +1517,7 @@ function renderGunghapForm({ prefillMy } = {}) {
 
   const formHtml = `
     <p class="tool-desc">나와 상대방의 띠를 고르면 삼합·육합·충 등 실제 지지(地支) 이론으로 궁합을 확인해드려요.</p>
-    <form action="/gunghap/compute" method="GET">
+    <form action="/gunghap/compute" method="GET" data-tool-id="zodiac_compatibility">
       <div class="form-select-group">
         <div class="form-row">
           <label for="my">나의 띠</label>
