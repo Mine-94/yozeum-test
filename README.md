@@ -64,8 +64,8 @@ npm start
 ## 6. SEO 관련
 
 - `/sitemap.xml`·`/robots.txt`는 서버가 `SITE_URL`을 이용해 자동 생성합니다(정적 파일이 아니므로 수동 편집 불필요).
-- **색인 품질 원칙**: sitemap에는 독립적인 설명 가치가 있는 도구·가이드·MBTI 유형·띠별 운세·일간 페이지만 포함합니다. 조합만 달라지는 띠 궁합·MBTI 궁합 결과와 개인 입력으로 만들어지는 사주·퀴즈 결과는 `noindex, follow`로 두고 sitemap에서 제외합니다.
-- **신규: 일간(日干) 단독 랜딩 페이지** (`/ilgan/갑=gap, 을=eul, 병=byeong, 정=jeong, 무=mu, 기=gi, 경=gyeong, 신=sin, 임=im, 계=gye`) — 생년월일 계산 없이 "갑목 성격"처럼 일간 하나만 검색하는 수요를 노리는 10개의 정적 랜딩 페이지입니다. `/saju` 폼과 상호 링크되어 있습니다.
+- **색인 품질 원칙**: sitemap에는 독립적인 설명 가치가 있는 도구·가이드·MBTI 유형·띠별 운세 페이지만 포함합니다. 조합만 달라지는 띠 궁합·MBTI 궁합 결과와 개인 입력으로 만들어지는 사주·퀴즈 결과는 `noindex, follow`로 두고 sitemap에서 제외합니다.
+- **일간(日干) 단독 해설 페이지** (`/ilgan/gap` 등 10개)는 기존 URL과 이용 기능은 유지하지만 구조와 설명의 중복도가 높아 `noindex, follow`로 전환하고 sitemap과 광고 게재 대상에서 제외했습니다. 일간 확인의 주 색인 페이지는 계산 기준과 활용법을 함께 제공하는 `/saju`입니다.
 - `/unse`(오늘의 띠별 운세) 페이지 제목/설명을 "8월21일 오늘의 띠별 운세"처럼 실제 검색 패턴에 맞춰 날짜를 맨 앞에 노출하도록 수정했습니다(한국-SEO-키워드-리서치 문서의 제안 반영).
 - `/saju`, `/gunghap` 폼 화면에 관련 결과 페이지로 가는 내부 링크 그리드를 추가했습니다(크롤러 발견성 + 재방문 유도).
 - 모든 페이지에 `canonical` 태그를 설정했습니다.
@@ -103,7 +103,7 @@ Render 등 클라우드 서버는 보통 UTC로 동작합니다. `lib/fortune.js
 
 ## 12. 테스트(업데이트)
 
-`run_tests.sh`에 신규 SEO 라우트(`/ilgan/:stemKey`, sitemap 동적 URL 전수 확인, 폼 화면 링크 그리드, 네이버 검증 태그) 테스트를 추가했습니다. `server.js`나 `views/render.js`, `lib/fortune.js`를 수정한 뒤에는 실행해보세요.
+`run_tests.sh`는 `/ilgan/:stemKey`의 접근성 유지와 색인 제외, sitemap URL 전수, 폼 화면 링크, 네이버 검증 태그를 함께 확인합니다. `server.js`나 `views/render.js`, `lib/fortune.js`를 수정한 뒤에는 실행해보세요.
 
 ```bash
 ./run_tests.sh

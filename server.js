@@ -5,7 +5,7 @@ const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
 const guides = require('./data/guides');
 const { questions: mbtiQuestions, types: mbtiTypes, axisInfo: mbtiAxisInfo } = require('./data/mbti');
-const { calcSaju, getTtiByYear, getTtiRelation, getTodayKST, TTI_ORDER, STEM_ROMAN, STEM_ROMAN_TO_KO } = require('./lib/fortune');
+const { calcSaju, getTtiByYear, getTtiRelation, getTodayKST, TTI_ORDER, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
   renderAboutPage,
@@ -144,10 +144,8 @@ app.get('/sitemap.xml', (req, res) => {
   // 오늘의 띠별 운세: /unse/:animal (12개) — 기존 라우트지만 sitemap에서 누락돼 있었음
   const unsePaths = TTI_ORDER.map((a) => `/unse/${a}`);
 
-  // 일간(日干) 랜딩 페이지: /ilgan/:stemKey (10개, "OO목 성격" 등 검색어 타겟)
-  const ilganPaths = STEM_ROMAN.map((k) => `/ilgan/${k}`);
-
-  const allPaths = [...staticPaths, ...unsePaths, ...ilganPaths];
+  // 비슷한 구조의 일간 단독 해설은 기존 URL을 유지하되 색인 대상에서는 제외합니다.
+  const allPaths = [...staticPaths, ...unsePaths];
   const urls = allPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
   res.type('application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
@@ -292,6 +290,7 @@ app.get('/saju/r/:year/:month/:day/:time', (req, res) => {
 // --- 일간(日干) 단독 랜딩 페이지 ---
 app.get('/ilgan/:stemKey', (req, res) => {
   if (!STEM_ROMAN_TO_KO[req.params.stemKey]) return notFound(res);
+  res.set('X-Robots-Tag', 'noindex, follow');
   res.send(renderIlganPage(req.params.stemKey));
 });
 

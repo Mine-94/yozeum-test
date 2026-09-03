@@ -194,14 +194,19 @@ else
   echo "PASS  sitemap에서 MBTI 궁합 조합 결과 제외"
   pass=$((pass+1))
 fi
-check_contains "sitemap에 /ilgan/gap(일간 랜딩) 포함" "$BASE/sitemap.xml" "/ilgan/gap<"
-check_contains "sitemap에 /ilgan/gye(일간 랜딩 마지막) 포함" "$BASE/sitemap.xml" "/ilgan/gye<"
+if curl -s "$BASE/sitemap.xml" | grep -q "/ilgan/"; then
+  echo "FAIL  sitemap에 유사도가 높은 일간 단독 페이지가 남아 있음"
+  fail=$((fail+1))
+else
+  echo "PASS  sitemap에서 일간 단독 페이지 10개 제외"
+  pass=$((pass+1))
+fi
 
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((31 + quiz_count + 12 + 10))
-echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}+운세12+일간10=${expected})"
+expected=$((31 + quiz_count + 12))
+echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}+운세12=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -399,6 +404,9 @@ for k in gap eul byeong jeong mu gi gyeong sin im gye; do
 done
 check_contains "갑목 페이지에 오행 성격 노출" "$BASE/ilgan/gap" "갑목"
 check_contains "갑목 페이지에 다른 일간 링크그리드" "$BASE/ilgan/gap" "link-grid"
+check_contains "일간 단독 페이지 메타 색인 제외" "$BASE/ilgan/gap" 'name="robots" content="noindex, follow"'
+check_header_contains "일간 단독 페이지 헤더 색인 제외" "$BASE/ilgan/gap" "X-Robots-Tag: noindex, follow"
+check_not_contains "일간 단독 페이지에서 AdSense 미호출" "$BASE/ilgan/gap" "pagead2.googlesyndication.com"
 check_status "잘못된 일간 키는 실제 404" "$BASE/ilgan/notakey" 404
 
 echo ""

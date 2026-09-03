@@ -213,7 +213,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
   });
 }
 
-function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, shareAnalyticsId, extraHtml, structuredData, allowThirdPartyScripts = true }) {
+function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, shareAnalyticsId, extraHtml, structuredData, robots, allowThirdPartyScripts = true }) {
   const shareLink = shareUrl ? trackedShareUrl(shareUrl) : '';
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
@@ -260,6 +260,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
     themeColor: accent,
     content,
     structuredData,
+    robots,
     allowThirdPartyScripts,
   });
 }
@@ -1499,6 +1500,8 @@ function renderIlganPage(stemRomanKey) {
     backHref: '/saju',
     backLabel: '내 사주팔자 계산하기',
     structuredData,
+    robots: 'noindex, follow',
+    allowThirdPartyScripts: false,
   });
 }
 
