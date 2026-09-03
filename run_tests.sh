@@ -5,7 +5,7 @@ BASE="http://localhost:$PORT"
 cd "$(dirname "$0")"
 
 echo "=== 서버 기동 ==="
-PORT=$PORT node server.js > /tmp/yozeum_test_server.log 2>&1 &
+PORT=$PORT ADSENSE_CLIENT_ID=ca-pub-8602848692420724 node server.js > /tmp/yozeum_test_server.log 2>&1 &
 SERVER_PID=$!
 sleep 1.5
 echo "server pid: $SERVER_PID"
@@ -35,6 +35,18 @@ check_contains() {
   else
     echo "FAIL  missing '$needle': $desc ($url)"
     fail=$((fail+1))
+  fi
+}
+
+check_not_contains() {
+  local desc="$1" url="$2" needle="$3" extra="${4:-}"
+  curl -s $extra "$url" -o /tmp/yozeum_resp.html
+  if grep -q "$needle" /tmp/yozeum_resp.html; then
+    echo "FAIL  unexpected '$needle': $desc ($url)"
+    fail=$((fail+1))
+  else
+    echo "PASS  omits '$needle': $desc"
+    pass=$((pass+1))
   fi
 }
 
@@ -393,6 +405,15 @@ echo ""
 echo "=== 내부 링크 그리드(폼 화면) ==="
 check_contains "사주 폼에 일간별 링크그리드" "$BASE/saju" "link-grid"
 check_contains "궁합 폼에 인기 조합 링크그리드" "$BASE/gunghap" "link-grid"
+
+echo ""
+echo "=== 사주 입력 개인정보 보호 ==="
+check_contains "사주 입력 전 결과 주소 노출 안내" "$BASE/saju" "결과 주소에는 생년월일과 시각이 포함"
+check_not_contains "사주 결과에서 Google Analytics 미호출" "$BASE/saju/r/1990/5/20/14" "googletagmanager.com"
+check_not_contains "사주 결과에서 AdSense 미호출" "$BASE/saju/r/1990/5/20/14" "pagead2.googlesyndication.com"
+check_contains "일반 색인 페이지에는 AdSense 확인 코드 유지" "$BASE/" "ca-pub-8602848692420724"
+check_contains "개인정보처리방침에 호스팅 접속 기록 고지" "$BASE/privacy.html" "호스팅 인프라에서 IP 주소"
+check_contains "개인정보처리방침에 사주 결과의 제3자 코드 미호출 고지" "$BASE/privacy.html" "Google Analytics와 AdSense 코드를 불러오지 않습니다"
 
 echo ""
 echo "=== 공유·개인정보·정적 자원 보호 ==="

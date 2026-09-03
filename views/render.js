@@ -65,7 +65,7 @@ function serializeJsonLd(data) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots }) {
+function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots, allowThirdPartyScripts = true }) {
   const accessibleContent = content.replace(/<main(?![^>]*\bid=)/, '<main id="main-content"');
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -77,7 +77,7 @@ function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, conten
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 <link rel="manifest" href="/manifest.json" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+${allowThirdPartyScripts && GA_MEASUREMENT_ID ? '<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />' : ''}
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
 ${robots ? `<meta name="robots" content="${escapeHtml(robots)}" />` : ''}
@@ -95,8 +95,8 @@ ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
 ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
-${ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
-${GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
+${allowThirdPartyScripts && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
+${allowThirdPartyScripts && GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${escapeHtml(GA_MEASUREMENT_ID)}');</script>` : ''}
 </head>
 <body class="${bodyClass || ''}">
@@ -125,7 +125,7 @@ ${accessibleContent}
     </nav>
   </div>
 </footer>
-${GA_MEASUREMENT_ID ? `<script>
+${allowThirdPartyScripts && GA_MEASUREMENT_ID ? `<script>
 (function () {
   function track(name, params) {
     if (typeof window.gtag === 'function') window.gtag('event', name, params || {});
@@ -213,7 +213,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
   });
 }
 
-function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, extraHtml, structuredData }) {
+function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, shareAnalyticsId, extraHtml, structuredData, allowThirdPartyScripts = true }) {
   const shareLink = shareUrl ? trackedShareUrl(shareUrl) : '';
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
@@ -231,7 +231,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
       ${
         shareUrl
           ? `<div class="result-actions" style="margin-bottom:14px;">
-        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareLink)}" data-text="${escapeHtml(shareText || '')}" data-share-id="${escapeHtml(new URL(shareUrl).pathname)}">
+        <button id="copy-link-btn" class="quiz-btn" data-url="${escapeHtml(shareLink)}" data-text="${escapeHtml(shareText || '')}" data-share-id="${escapeHtml(shareAnalyticsId || new URL(shareUrl).pathname)}">
           결과 공유하기
         </button>
         <p id="share-status" class="action-status" role="status" aria-live="polite"></p>
@@ -260,6 +260,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
     themeColor: accent,
     content,
     structuredData,
+    allowThirdPartyScripts,
   });
 }
 
@@ -1269,6 +1270,7 @@ function renderSajuForm({ error } = {}) {
       </div>
       <button type="submit" class="quiz-btn">무료 만세력 계산하기</button>
     </form>
+    <p class="disclaimer" style="text-align:left;margin-top:16px;">입력값은 회원 정보나 별도 데이터베이스에 저장하지 않습니다. 다만 계산 결과 주소에는 생년월일과 시각이 포함되므로, 링크를 공유하면 상대방이 해당 정보를 볼 수 있습니다. 결과 페이지에는 Google Analytics와 AdSense를 불러오지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>에서 확인할 수 있어요.</p>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">본 계산기는 양력 생년월일(시)을 기준으로 절기(입춘 등)를 반영해 년·월·일·시주를 계산하는 정식 사주 계산기입니다. 다만 실제 사주 해석은 십성·용신·격국 등 훨씬 복잡한 요소를 함께 봐야 하므로, 본 결과는 오행 분포와 일간 기준의 간이 해설로 참고만 해주세요.</p>
     <div class="link-grid">
       <p class="link-grid-title">일간(日干)별 성격이 궁금하다면?</p>
@@ -1416,7 +1418,9 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
     backLabel: '다시 계산하기',
     shareUrl,
     shareText: `나의 사주 일간은 ${dayStemKo}(${stemInfo.symbol})! 오행 분포까지 확인해보세요 🔮`,
+    shareAnalyticsId: 'saju_result',
     structuredData,
+    allowThirdPartyScripts: false,
   });
 }
 
