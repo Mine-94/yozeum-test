@@ -818,7 +818,7 @@ function renderMbtiTest(questions, axisInfo) {
   });
 }
 
-function renderMbtiType(typeCode, type, breakdown) {
+function renderMbtiType(typeCode, type, breakdown, celebrityResults = []) {
   const pageUrl = `${SITE_URL}/mbti/type/${typeCode}`;
   const list = (items) => `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
   const breakdownHtml = breakdown
@@ -832,6 +832,24 @@ function renderMbtiType(typeCode, type, breakdown) {
           </div>`).join('')}
       </section>`
     : '';
+  const celebrityCards = celebrityResults.map((celebrity) => `
+    <article class="mbti-celebrity-card">
+      <span class="mbti-celebrity-monogram" aria-hidden="true">${escapeHtml(celebrity.name.slice(0, 1))}</span>
+      <div>
+        <h3>${escapeHtml(celebrity.name)}</h3>
+        <p>${escapeHtml(celebrity.group)}</p>
+        <a href="${escapeHtml(celebrity.source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(celebrity.source.published)} 공개 자료 확인<span class="sr-only">: ${escapeHtml(celebrity.source.label)}</span> ↗</a>
+      </div>
+    </article>`).join('');
+  const celebrityHtml = celebrityCards
+    ? `<section class="mbti-celebrity-section" aria-labelledby="mbti-celebrity-title">
+        <p class="article-category">공개 자료 기준</p>
+        <h2 id="mbti-celebrity-title">당신과 같은 유형을 공개한 셀럽들</h2>
+        <p class="mbti-celebrity-intro">${typeCode} 결과를 직접 공개했거나 공식 콘텐츠에서 확인된 인물만 모았습니다. 공개 당시의 결과이며, 다시 검사하면 달라질 수 있습니다.</p>
+        <div class="mbti-celebrity-grid">${celebrityCards}</div>
+        <p class="mbti-celebrity-note">같은 네 글자가 성격 전체나 능력이 같다는 뜻은 아닙니다. 공개하지 않은 인물은 말투·행동·작품만 보고 임의로 분류하지 않습니다.</p>
+      </section>`
+    : '';
   const content = `
   <header class="site-header mbti-header">
     <div class="container">
@@ -840,13 +858,14 @@ function renderMbtiType(typeCode, type, breakdown) {
       <p class="mbti-type-hero-code">${typeCode}</p>
       <h1>${typeCode} ${escapeHtml(type.name)}</h1>
       <p class="tagline">${escapeHtml(type.tagline)}</p>
-      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 2일 검토</p>
+      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 3일 검토</p>
     </div>
   </header>
   <main class="container mbti-type-page">
     <article class="article-card">
       <p class="article-lead">${escapeHtml(type.summary)}</p>
       ${breakdownHtml}
+      ${celebrityHtml}
       <div class="mbti-detail-grid">
         <section><h2>잘하는 것</h2>${list(type.strengths)}</section>
         <section><h2>놓치기 쉬운 부분</h2>${list(type.blindSpots)}</section>
@@ -868,7 +887,7 @@ function renderMbtiType(typeCode, type, breakdown) {
     {
       '@context': 'https://schema.org', '@type': 'Article', headline: `${typeCode} ${type.name}: 성격·연애·직업 상세 설명`,
       description: type.summary, url: pageUrl, mainEntityOfPage: pageUrl, inLanguage: 'ko-KR',
-      datePublished: '2026-09-01', dateModified: '2026-09-02',
+      datePublished: '2026-09-01', dateModified: '2026-09-03',
       author: { '@type': 'Organization', name: `${SITE_NAME} 운영자`, url: `${SITE_URL}/about` },
       publisher: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/` },
     },

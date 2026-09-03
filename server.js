@@ -5,6 +5,7 @@ const quizzes = require('./data/quizzes');
 const fortuneTools = require('./data/fortune-tools');
 const guides = require('./data/guides');
 const { questions: mbtiQuestions, types: mbtiTypes, axisInfo: mbtiAxisInfo } = require('./data/mbti');
+const mbtiCelebrityResults = require('./data/mbti-celebrities');
 const { calcSaju, getTtiByYear, getTtiRelation, getTodayKST, TTI_ORDER, STEM_ROMAN_TO_KO } = require('./lib/fortune');
 const {
   renderHome,
@@ -175,7 +176,7 @@ app.get('/mbti/type/:type', (req, res) => {
         { title: '생활 방식', left: 'J', right: 'P', leftValue: values[3], rightValue: 100 - values[3] },
       ]
     : null;
-  res.send(renderMbtiType(typeCode, mbtiTypes[typeCode], breakdown));
+  res.send(renderMbtiType(typeCode, mbtiTypes[typeCode], breakdown, mbtiCelebrityResults[typeCode]));
 });
 
 app.get('/mbti/compatibility', (req, res) => {

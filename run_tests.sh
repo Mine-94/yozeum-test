@@ -234,7 +234,14 @@ check_contains "INFP 유형에 성격 설명" "$BASE/mbti/type/INFP" "가치 중
 check_contains "INFP 유형에 연애·관계 설명" "$BASE/mbti/type/INFP" "연애와 인간관계"
 check_contains "INFP 유형에 업무 환경 설명" "$BASE/mbti/type/INFP" "일할 때 강점과 어울리는 환경"
 check_contains "유형 페이지 Article 구조화데이터" "$BASE/mbti/type/INFP" '"@type":"Article"'
-check_contains "유형 페이지에 작성 주체와 검토일" "$BASE/mbti/type/INFP" "요즘테스트 운영자 · 2026년 9월 2일 검토"
+check_contains "유형 페이지에 작성 주체와 검토일" "$BASE/mbti/type/INFP" "요즘테스트 운영자 · 2026년 9월 3일 검토"
+check_contains "MBTI 결과에 같은 유형 공개 셀럽 섹션" "$BASE/mbti/type/INTP" "당신과 같은 유형을 공개한 셀럽들"
+check_contains "INTP 결과에 진 공개 자료" "$BASE/mbti/type/INTP" ">진<"
+check_contains "INTP 결과에 정국 공개 자료" "$BASE/mbti/type/INTP" ">정국<"
+check_contains "셀럽 분류의 추정 금지 원칙" "$BASE/mbti/type/INTP" "임의로 분류하지 않습니다"
+for type in ISTJ ISFJ INFJ INTJ ISTP ISFP INFP INTP ESTP ESFP ENFP ENTP ESTJ ESFJ ENFJ ENTJ; do
+  check_contains "$type 결과에 확인 가능한 셀럽 출처" "$BASE/mbti/type/$type" "공개 자료 확인"
+done
 check_status "소문자 MBTI 유형은 정규 URL로 영구 이동" "$BASE/mbti/type/infp" 301
 check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" "/mbti/type/INFP"
 check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "E 20%"

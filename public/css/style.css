@@ -908,6 +908,18 @@ main { padding-bottom: 40px; }
 .mbti-bar-row { margin-top: 15px; }
 .mbti-bar-labels strong { color: var(--text); }
 .mbti-bar { margin: 5px 0 0; }
+.mbti-celebrity-section { margin: 0 0 26px; padding: 20px; background: #f7f5ff; border: 1px solid #dedaf3; border-radius: 14px; }
+.mbti-celebrity-section > .article-category { margin: 0 0 5px; color: #6657c7; font-size: .72rem; font-weight: 800; letter-spacing: .06em; }
+.mbti-celebrity-section > h2 { margin: 0; font-size: 1.08rem; }
+.mbti-celebrity-intro { margin: 8px 0 16px; color: var(--text-muted); font-size: .84rem; line-height: 1.6; }
+.mbti-celebrity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mbti-celebrity-card { display: grid; grid-template-columns: 46px 1fr; gap: 11px; align-items: center; padding: 13px; background: white; border: 1px solid var(--border); border-radius: 12px; }
+.mbti-celebrity-monogram { display: grid; width: 46px; height: 46px; place-items: center; color: white; background: linear-gradient(145deg, #6657c7, #9c75dc); border-radius: 50%; font-size: 1.05rem; font-weight: 900; }
+.mbti-celebrity-card h3 { margin: 0; font-size: .9rem; }
+.mbti-celebrity-card p { margin: 2px 0 5px; color: var(--text-muted); font-size: .74rem; }
+.mbti-celebrity-card a { color: #6657c7; font-size: .7rem; font-weight: 700; text-decoration: none; }
+.mbti-celebrity-card a:hover { text-decoration: underline; }
+.mbti-celebrity-note { margin: 14px 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.55; }
 .mbti-compare-selects { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; margin-bottom: 18px; }
 .mbti-compare-selects label { color: var(--text-muted); font-size: .8rem; font-weight: 700; }
 .mbti-compare-selects select { width: 100%; margin-top: 6px; padding: 12px 10px; color: var(--text); background: white; border: 1.5px solid var(--border); border-radius: 10px; font: inherit; font-size: .84rem; }
@@ -957,5 +969,6 @@ main { padding-bottom: 40px; }
   .mbti-axis-grid, .mbti-type-grid { grid-template-columns: 1fr; }
   .mbti-type-card p { min-height: 0; }
   .mbti-compare-selects { grid-template-columns: 1fr; }
+  .mbti-celebrity-grid { grid-template-columns: 1fr; }
   .mbti-compare-mark { padding: 0; text-align: center; }
 }
