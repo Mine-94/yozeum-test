@@ -179,7 +179,13 @@ check_contains "sitemap에 MBTI 테스트 포함" "$BASE/sitemap.xml" "/mbti/tes
 check_contains "sitemap에 MBTI 궁합 폼 포함" "$BASE/sitemap.xml" "/mbti/compatibility<"
 check_contains "sitemap에 INFP 유형 포함" "$BASE/sitemap.xml" "/mbti/type/INFP<"
 check_contains "sitemap 공식 도메인" "$BASE/sitemap.xml" "https://yozeum-test.com/"
-check_contains "sitemap에 /unse/rat(동적 페이지) 포함" "$BASE/sitemap.xml" "/unse/rat<"
+if curl -s "$BASE/sitemap.xml" | grep -q "/unse/rat"; then
+  echo "FAIL  sitemap에 날짜·띠 조합 운세 결과 페이지가 남아 있음"
+  fail=$((fail+1))
+else
+  echo "PASS  sitemap에서 띠별 운세 결과 12개 제외"
+  pass=$((pass+1))
+fi
 if curl -s "$BASE/sitemap.xml" | grep -q "/gunghap/r/"; then
   echo "FAIL  sitemap에 유사한 궁합 결과 페이지가 남아 있음"
   fail=$((fail+1))
@@ -205,8 +211,8 @@ fi
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((31 + quiz_count + 12))
-echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}+운세12=${expected})"
+expected=$((31 + quiz_count))
+echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))
@@ -378,11 +384,15 @@ echo "=== 오늘의 띠별 운세 ==="
 check_status "운세 홈" "$BASE/unse" 200
 for a in rat ox tiger rabbit dragon snake horse goat monkey rooster dog pig; do
   check_status "운세 개별 페이지: $a" "$BASE/unse/$a" 200
+  check_header_contains "운세 개별 페이지 색인 제외: $a" "$BASE/unse/$a" "X-Robots-Tag: noindex, follow"
+  check_not_contains "운세 개별 페이지 광고 제외: $a" "$BASE/unse/$a" "pagead2.googlesyndication.com"
 done
 check_contains "운세 홈에 12띠 모두 노출" "$BASE/unse" "쥐띠"
 check_contains "운세 홈에 출생연도 저장 기능" "$BASE/unse" "data-save-birth-year"
 check_contains "운세 결과에 띠 저장 기능" "$BASE/unse/rat" 'data-save-zodiac="rat"'
 check_contains "운세 결과에 띠별 고유 활용 가이드" "$BASE/unse/rat" "필요한 정보와 비용부터"
+check_contains "띠별 운세 결과 메타 색인 제외" "$BASE/unse/rat" 'name="robots" content="noindex, follow"'
+check_contains "띠별 운세 이용 분석은 유지" "$BASE/unse/rat" "googletagmanager.com"
 check_contains "선호 저장 스크립트는 로컬 저장소 사용" "$BASE/js/preferences.js" "window.localStorage"
 check_redirect_location "연도로 띠 찾기(1990→午=말띠)" "$BASE/unse/find?year=1990" "/unse/horse"
 check_status "잘못된 띠 파라미터는 실제 404" "$BASE/unse/notanaimal" 404

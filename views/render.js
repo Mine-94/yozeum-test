@@ -65,7 +65,7 @@ function serializeJsonLd(data) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots, allowThirdPartyScripts = true }) {
+function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots, allowThirdPartyScripts = true, allowAdvertising = true }) {
   const accessibleContent = content.replace(/<main(?![^>]*\bid=)/, '<main id="main-content"');
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -95,7 +95,7 @@ ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
 ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
-${allowThirdPartyScripts && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
+${allowThirdPartyScripts && allowAdvertising && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
 ${allowThirdPartyScripts && GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${escapeHtml(GA_MEASUREMENT_ID)}');</script>` : ''}
 </head>
@@ -213,7 +213,7 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
   });
 }
 
-function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, shareAnalyticsId, extraHtml, structuredData, robots, allowThirdPartyScripts = true }) {
+function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, ogTitle, description, backHref, backLabel, shareUrl, shareText, shareAnalyticsId, extraHtml, structuredData, robots, allowThirdPartyScripts = true, allowAdvertising = true }) {
   const shareLink = shareUrl ? trackedShareUrl(shareUrl) : '';
   const content = `
   <header class="site-header quiz-header" style="--accent:${accent}">
@@ -262,6 +262,7 @@ function resultPageShell({ accent, eyebrow, emoji, titleHtml, bodyHtml, ogUrl, o
     structuredData,
     robots,
     allowThirdPartyScripts,
+    allowAdvertising,
   });
 }
 
@@ -1665,6 +1666,8 @@ function renderUnseResult(animalKey) {
     shareUrl,
     shareText: `오늘 ${info.name}띠 운세: ${lines['총운']}`,
     structuredData,
+    robots: 'noindex, follow',
+    allowAdvertising: false,
   });
 }
 

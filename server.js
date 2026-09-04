@@ -142,11 +142,9 @@ app.get('/sitemap.xml', (req, res) => {
     '/terms.html',
   ];
 
-  // 오늘의 띠별 운세: /unse/:animal (12개) — 기존 라우트지만 sitemap에서 누락돼 있었음
-  const unsePaths = TTI_ORDER.map((a) => `/unse/${a}`);
-
-  // 비슷한 구조의 일간 단독 해설은 기존 URL을 유지하되 색인 대상에서는 제외합니다.
-  const allPaths = [...staticPaths, ...unsePaths];
+  // 날짜·띠만 다른 운세 결과와 비슷한 구조의 일간 해설은 기존 URL을 유지하되
+  // 독립적인 검색 문서로 보기 어려워 sitemap과 광고 대상에서는 제외합니다.
+  const allPaths = staticPaths;
   const urls = allPaths.map((p) => `  <url><loc>${SITE_URL}${p}</loc></url>`).join('\n');
   res.type('application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
@@ -315,6 +313,7 @@ app.get('/unse/find', (req, res) => {
 
 app.get('/unse/:animal', (req, res) => {
   if (!TTI_ORDER.includes(req.params.animal)) return notFound(res);
+  res.set('X-Robots-Tag', 'noindex, follow');
   res.send(renderUnseResult(req.params.animal));
 });
 
