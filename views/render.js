@@ -907,7 +907,7 @@ function renderMbtiType(typeCode, type, breakdown, celebrityResults = []) {
       <div>
         <h3>${escapeHtml(celebrity.name)}</h3>
         <p>${escapeHtml(celebrity.group)}</p>
-        <a href="${escapeHtml(celebrity.source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(celebrity.source.published)} 공개 자료 확인<span class="sr-only">: ${escapeHtml(celebrity.source.label)}</span> ↗</a>
+        <a href="${escapeHtml(celebrity.source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(celebrity.source.publisher)} · ${escapeHtml(celebrity.source.published)} 확인<span class="sr-only">: ${escapeHtml(celebrity.source.label)}</span> ↗</a>
       </div>
     </article>`).join('');
   const celebrityHtml = celebrityCards
@@ -916,7 +916,7 @@ function renderMbtiType(typeCode, type, breakdown, celebrityResults = []) {
         <h2 id="mbti-celebrity-title">당신과 같은 유형을 공개한 셀럽들</h2>
         <p class="mbti-celebrity-intro">${typeCode} 결과를 직접 공개했거나 공식 콘텐츠에서 확인된 인물만 모았습니다. 공개 당시의 결과이며, 다시 검사하면 달라질 수 있습니다.</p>
         <div class="mbti-celebrity-grid">${celebrityCards}</div>
-        <p class="mbti-celebrity-note">같은 네 글자가 성격 전체나 능력이 같다는 뜻은 아닙니다. 공개하지 않은 인물은 말투·행동·작품만 보고 임의로 분류하지 않습니다.</p>
+        <p class="mbti-celebrity-note">같은 네 글자가 성격 전체나 능력이 같다는 뜻은 아닙니다. 공개하지 않은 인물은 말투·행동·작품만 보고 임의로 분류하지 않습니다. 출처 링크는 2026년 9월 4일 다시 확인했습니다.</p>
       </section>`
     : '';
   const content = `
@@ -927,7 +927,7 @@ function renderMbtiType(typeCode, type, breakdown, celebrityResults = []) {
       <p class="mbti-type-hero-code">${typeCode}</p>
       <h1>${typeCode} ${escapeHtml(type.name)}</h1>
       <p class="tagline">${escapeHtml(type.tagline)}</p>
-      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 3일 검토</p>
+      <p class="article-meta">요즘테스트 운영자 · 2026년 9월 4일 검토</p>
     </div>
   </header>
   <main class="container mbti-type-page">
@@ -956,7 +956,7 @@ function renderMbtiType(typeCode, type, breakdown, celebrityResults = []) {
     {
       '@context': 'https://schema.org', '@type': 'Article', headline: `${typeCode} ${type.name}: 성격·연애·직업 상세 설명`,
       description: type.summary, url: pageUrl, mainEntityOfPage: pageUrl, inLanguage: 'ko-KR',
-      datePublished: '2026-09-01', dateModified: '2026-09-03',
+      datePublished: '2026-09-01', dateModified: '2026-09-04',
       author: { '@type': 'Organization', name: `${SITE_NAME} 운영자`, url: `${SITE_URL}/about` },
       publisher: { '@type': 'Organization', name: SITE_NAME, url: `${SITE_URL}/` },
     },

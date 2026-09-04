@@ -1,15 +1,25 @@
 #!/bin/bash
 set -uo pipefail
 PORT=3010
-# 일부 격리 실행 환경에서 localhost 이름 해석이 간헐적으로 실패하므로
-# 로컬 서버 회귀 테스트는 루프백 IPv4 주소로 고정합니다.
+# 루프백 주소를 고정해 이름 해석과 프록시 설정의 영향을 받지 않게 합니다.
 BASE="http://127.0.0.1:$PORT"
 cd "$(dirname "$0")"
 
+# 실행 환경에 HTTP 프록시가 설정돼 있어도 로컬 검증 요청이 외부로
+# 우회되지 않게 합니다. 그렇지 않으면 예전 배포 응답을 검사해
+# 현재 코드의 오류로 잘못 판단할 수 있습니다.
+export NO_PROXY="localhost,127.0.0.1${NO_PROXY:+,$NO_PROXY}"
+export no_proxy="$NO_PROXY"
+
 echo "=== 서버 기동 ==="
-PORT=$PORT ADSENSE_CLIENT_ID=ca-pub-8602848692420724 node server.js > /tmp/yozeum_test_server.log 2>&1 &
+PORT=$PORT NODE_ENV=test ADSENSE_CLIENT_ID=ca-pub-8602848692420724 node server.js > /tmp/yozeum_test_server.log 2>&1 &
 SERVER_PID=$!
-sleep 1.5
+for _ in 1 2 3 4 5; do
+  if curl --noproxy '*' -fsS "$BASE/" > /dev/null 2>&1; then
+    break
+  fi
+  sleep 0.5
+done
 echo "server pid: $SERVER_PID"
 
 pass=0
@@ -253,13 +263,17 @@ check_contains "INFP 유형에 성격 설명" "$BASE/mbti/type/INFP" "가치 중
 check_contains "INFP 유형에 연애·관계 설명" "$BASE/mbti/type/INFP" "연애와 인간관계"
 check_contains "INFP 유형에 업무 환경 설명" "$BASE/mbti/type/INFP" "일할 때 강점과 어울리는 환경"
 check_contains "유형 페이지 Article 구조화데이터" "$BASE/mbti/type/INFP" '"@type":"Article"'
-check_contains "유형 페이지에 작성 주체와 검토일" "$BASE/mbti/type/INFP" "요즘테스트 운영자 · 2026년 9월 3일 검토"
+check_contains "유형 페이지에 작성 주체와 검토일" "$BASE/mbti/type/INFP" "요즘테스트 운영자 · 2026년 9월 4일 검토"
 check_contains "MBTI 결과에 같은 유형 공개 셀럽 섹션" "$BASE/mbti/type/INTP" "당신과 같은 유형을 공개한 셀럽들"
 check_contains "INTP 결과에 진 공개 자료" "$BASE/mbti/type/INTP" ">진<"
 check_contains "INTP 결과에 정국 공개 자료" "$BASE/mbti/type/INTP" ">정국<"
 check_contains "셀럽 분류의 추정 금지 원칙" "$BASE/mbti/type/INTP" "임의로 분류하지 않습니다"
+check_contains "셀럽 출처 기관을 화면에 표시" "$BASE/mbti/type/INTP" "BANGTANTV · 2022년 5월 확인"
+check_contains "셀럽 출처 링크 재검토일 표시" "$BASE/mbti/type/INTP" "2026년 9월 4일 다시 확인"
+check_contains "2022년 공식 결과에 따라 지민은 ESTP에 표시" "$BASE/mbti/type/ESTP" ">지민<"
+check_not_contains "지민의 과거 ENFJ 결과를 최신 공식 결과로 오인하지 않음" "$BASE/mbti/type/ENFJ" ">지민<"
 for type in ISTJ ISFJ INFJ INTJ ISTP ISFP INFP INTP ESTP ESFP ENFP ENTP ESTJ ESFJ ENFJ ENTJ; do
-  check_contains "$type 결과에 확인 가능한 셀럽 출처" "$BASE/mbti/type/$type" "공개 자료 확인"
+  check_contains "$type 결과에 확인 가능한 셀럽 출처" "$BASE/mbti/type/$type" "확인"
 done
 check_status "소문자 MBTI 유형은 정규 URL로 영구 이동" "$BASE/mbti/type/infp" 301
 check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" "/mbti/type/INFP"

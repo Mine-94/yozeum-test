@@ -41,7 +41,9 @@ app.disable('x-powered-by');
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 300,
+  // 회귀 검증은 짧은 시간에 수백 개의 정상 요청을 보내므로 테스트
+  // 환경에서만 한도를 넉넉히 둡니다. 실제 서비스 한도는 그대로입니다.
+  max: process.env.NODE_ENV === 'test' ? 5000 : 300,
   standardHeaders: true,
   legacyHeaders: false,
 });
