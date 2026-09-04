@@ -1,7 +1,9 @@
 #!/bin/bash
 set -uo pipefail
 PORT=3010
-BASE="http://localhost:$PORT"
+# 일부 격리 실행 환경에서 localhost 이름 해석이 간헐적으로 실패하므로
+# 로컬 서버 회귀 테스트는 루프백 IPv4 주소로 고정합니다.
+BASE="http://127.0.0.1:$PORT"
 cd "$(dirname "$0")"
 
 echo "=== 서버 기동 ==="
@@ -143,6 +145,14 @@ check_contains "사이트 소개에 AboutPage 구조화데이터" "$BASE/about" 
 check_contains "사이트 소개에 제작·검토 과정" "$BASE/about" "누가, 어떻게 만들고 검토하나요?"
 check_contains "사이트 소개에 자동화 보조 공개" "$BASE/about" "자동화 도구를 보조적으로"
 check_contains "사이트 소개에 오류 수정 원칙" "$BASE/about" "업데이트와 오류 수정 원칙"
+check_contains "사이트 소개에서 정정 요청 경로 연결" "$BASE/about" 'href="/contact"'
+check_status "오류·정정 요청" "$BASE/contact" 200
+check_contains "오류·정정 요청 ContactPage 구조화데이터" "$BASE/contact" '"@type":"ContactPage"'
+check_contains "실제 공개 문의함 연결" "$BASE/contact" "github.com/Mine-94/yozeum-test/issues/new?template=site-feedback.md"
+check_contains "공개 범위와 개인정보 주의 안내" "$BASE/contact" "작성한 내용은 공개됩니다"
+check_contains "외부 문의 링크 보호 속성" "$BASE/contact" 'rel="noopener noreferrer"'
+check_not_contains "개인 Gmail 비공개 유지" "$BASE/contact" "@gmail.com"
+check_contains "전역 푸터에서 정정 요청 경로 연결" "$BASE/mbti" 'href="/contact">오류·정정 요청'
 check_status "읽을거리 허브" "$BASE/guides" 200
 check_contains "읽을거리 허브에 CollectionPage 구조화데이터" "$BASE/guides" '"@type":"CollectionPage"'
 for guide in saju-first-read five-elements-balance zodiac-compatibility personality-test-results; do
@@ -155,6 +165,8 @@ check_status "개인정보처리방침" "$BASE/privacy.html" 200
 check_status "이용약관" "$BASE/terms.html" 200
 check_contains "개인정보처리방침 canonical" "$BASE/privacy.html" 'rel="canonical" href="https://yozeum-test.com/privacy.html"'
 check_contains "이용약관 canonical" "$BASE/terms.html" 'rel="canonical" href="https://yozeum-test.com/terms.html"'
+check_contains "개인정보처리방침에서 정정 요청 경로 연결" "$BASE/privacy.html" 'href="/contact"'
+check_contains "이용약관에서 정정 요청 경로 연결" "$BASE/terms.html" 'href="/contact"'
 check_contains "개인정보처리방침에 분석 정보 항목" "$BASE/privacy.html" "방문 페이지, 유입 경로"
 check_contains "개인정보처리방침에 Google 정책 링크" "$BASE/privacy.html" "policies.google.com/privacy"
 check_contains "개인정보처리방침에서 실제 수집 범위 명시" "$BASE/privacy.html" "회원 계정, 이름, 전화번호, 이메일을 직접 수집하는 기능을 현재 제공하지 않습니다"
@@ -172,6 +184,7 @@ check_contains "sitemap에 /saju 포함" "$BASE/sitemap.xml" "/saju"
 check_contains "sitemap에 /unse 포함" "$BASE/sitemap.xml" "/unse"
 check_contains "sitemap에 /gunghap 포함" "$BASE/sitemap.xml" "/gunghap"
 check_contains "sitemap에 /about 포함" "$BASE/sitemap.xml" "/about<"
+check_contains "sitemap에 /contact 포함" "$BASE/sitemap.xml" "/contact<"
 check_contains "sitemap에 /guides 포함" "$BASE/sitemap.xml" "/guides<"
 check_contains "sitemap에 개별 가이드 포함" "$BASE/sitemap.xml" "/guides/saju-first-read<"
 check_contains "sitemap에 MBTI 허브 포함" "$BASE/sitemap.xml" "/mbti<"
@@ -211,8 +224,8 @@ fi
 curl -s "$BASE/sitemap.xml" -o /tmp/yozeum_resp.html
 url_count=$(grep -o '<url>' /tmp/yozeum_resp.html | wc -l)
 quiz_count=$(node -e "console.log(require('./data/quizzes').length)")
-expected=$((31 + quiz_count))
-echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI31+퀴즈${quiz_count}=${expected})"
+expected=$((32 + quiz_count))
+echo "sitemap내 URL수: $url_count (기대값: 정적·가이드·MBTI32+퀴즈${quiz_count}=${expected})"
 if [ "$url_count" == "$expected" ]; then
   echo "PASS  sitemap URL 수가 예상과 일치"
   pass=$((pass+1))

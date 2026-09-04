@@ -120,6 +120,7 @@ ${accessibleContent}
       <a href="/mbti">MBTI</a>
       <a href="/guides">읽을거리</a>
       <a href="/about">사이트 소개</a>
+      <a href="/contact">오류·정정 요청</a>
       <a href="/privacy.html">개인정보처리방침</a>
       <a href="/terms.html">이용약관</a>
     </nav>
@@ -495,6 +496,7 @@ function renderAboutPage() {
       <h2>업데이트와 오류 수정 원칙</h2>
       <p>오늘의 운세는 한국 날짜와 띠를 기준으로 매일 결과가 바뀌지만, 가이드와 유형 설명의 검토일은 내용이 실제로 달라졌을 때만 갱신합니다. 단순히 새 글처럼 보이게 하려고 날짜만 바꾸지 않습니다.</p>
       <p>계산 오류나 설명의 모순이 확인되면 한 문장만 덮어쓰지 않고 원인과 영향을 받는 페이지를 함께 살핍니다. 수정 뒤에는 기존 도구가 망가지지 않았는지 전체 자동 테스트와 실제 서비스 응답을 다시 확인합니다.</p>
+      <p><a href="/contact">오류·정정 요청 방법 보기 →</a></p>
     </section>
   </main>`;
 
@@ -502,6 +504,72 @@ function renderAboutPage() {
     title: `사이트 소개·계산 방식 - ${SITE_NAME}`,
     description: '요즘테스트의 사주·운세 계산 방식과 심리테스트 채점 기준, 콘텐츠 운영 원칙을 확인하세요.',
     ogUrl: aboutUrl,
+    content,
+    structuredData,
+  });
+}
+
+function renderContactPage() {
+  const contactUrl = `${SITE_URL}/contact`;
+  const feedbackUrl = 'https://github.com/Mine-94/yozeum-test/issues/new?template=site-feedback.md';
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: `오류·정정 요청 - ${SITE_NAME}`,
+      description: '요즘테스트의 계산 오류, 깨진 기능, 사실관계와 표현 문제를 알리는 방법을 안내합니다.',
+      url: contactUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '오류·정정 요청', item: contactUrl },
+      ],
+    },
+  ];
+
+  const content = `
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">${SITE_NAME}</a>
+      <h1>오류·정정 요청</h1>
+      <p class="tagline">계산 오류나 설명의 문제를 확인하면 근거와 함께 알려주세요</p>
+    </div>
+  </header>
+
+  <main class="container about-page">
+    <section class="info-card">
+      <h2>어떤 내용을 보낼 수 있나요?</h2>
+      <ul class="about-principles">
+        <li>버튼이 작동하지 않거나 화면이 깨지는 기능 오류</li>
+        <li>사주·띠 계산 결과가 기준 설명과 맞지 않는 경우</li>
+        <li>출처, 사실관계, 오탈자 또는 오해를 부르는 표현</li>
+        <li>접근성이나 모바일 이용 과정에서 발견한 불편</li>
+      </ul>
+    </section>
+
+    <section class="info-card">
+      <h2>요청을 남기는 방법</h2>
+      <p>아래 버튼을 누르면 요즘테스트의 공개 GitHub 문의함으로 이동합니다. 문제가 발생한 페이지 주소, 실제로 본 내용, 기대한 결과를 적어주세요. GitHub 로그인이 필요합니다.</p>
+      <p><strong>작성한 내용은 공개됩니다.</strong> 이름, 이메일, 생년월일, 출생시간, 계정 정보처럼 개인을 식별할 수 있는 내용은 적지 마세요.</p>
+      <p><a class="quiz-btn" href="${feedbackUrl}" target="_blank" rel="noopener noreferrer">공개 오류·정정 요청 작성하기</a></p>
+    </section>
+
+    <section class="info-card">
+      <h2>확인과 수정 기준</h2>
+      <p>요청이 들어오면 재현 가능 여부와 근거를 먼저 확인합니다. 실제 오류라면 같은 원인이 영향을 주는 다른 페이지도 함께 점검하고, 자동 테스트와 라이브 확인을 거쳐 수정합니다.</p>
+      <p>개인 사주 해석, 심리 상담, 투자·건강·법률 판단은 답변하지 않습니다. 이 창구는 사이트 기능과 공개 콘텐츠의 오류·정정 요청만 받습니다.</p>
+    </section>
+  </main>`;
+
+  return baseLayout({
+    title: `오류·정정 요청 - ${SITE_NAME}`,
+    description: '요즘테스트의 계산 오류, 깨진 기능, 사실관계와 표현 문제를 알리는 방법을 확인하세요.',
+    ogUrl: contactUrl,
     content,
     structuredData,
   });
@@ -1830,6 +1898,7 @@ function renderNotFound() {
 module.exports = {
   renderHome,
   renderAboutPage,
+  renderContactPage,
   renderGuidesHome,
   renderGuidePage,
   renderMbtiHome,

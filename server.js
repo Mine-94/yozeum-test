@@ -10,6 +10,7 @@ const { calcSaju, getTtiByYear, getTtiRelation, getTodayKST, TTI_ORDER, STEM_ROM
 const {
   renderHome,
   renderAboutPage,
+  renderContactPage,
   renderGuidesHome,
   renderGuidePage,
   renderMbtiHome,
@@ -99,6 +100,10 @@ app.get('/about', (req, res) => {
   res.send(renderAboutPage());
 });
 
+app.get('/contact', (req, res) => {
+  res.send(renderContactPage());
+});
+
 // 주소창에 확장자 없이 입력해도 기존 정규 URL로 안전하게 연결합니다.
 app.get('/privacy', (req, res) => {
   res.redirect(301, '/privacy.html');
@@ -131,6 +136,7 @@ app.get('/sitemap.xml', (req, res) => {
     '/unse',
     '/gunghap',
     '/about',
+    '/contact',
     '/guides',
     '/mbti',
     '/mbti/test',
