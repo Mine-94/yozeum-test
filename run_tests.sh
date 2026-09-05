@@ -307,6 +307,7 @@ check_header_contains "퀴즈 결과 페이지 색인 제외" "$BASE/q/meta-sens
 check_status "존재하지 않는 퀴즈는 실제 404" "$BASE/q/nope" 404
 check_contains "404 페이지에 검색 제외 메타" "$BASE/q/nope" 'name="robots" content="noindex, follow"'
 check_header_contains "404 페이지에 검색 제외 헤더" "$BASE/q/nope" "X-Robots-Tag: noindex, follow"
+check_not_contains "404 페이지에서 AdSense 미호출" "$BASE/q/nope" "pagead2.googlesyndication.com"
 check_status "존재하지 않는 일반 주소는 실제 404" "$BASE/not-a-real-page" 404
 check_status "존재하지 않는 가이드는 실제 404" "$BASE/guides/not-a-guide" 404
 check_status "존재하지 않는 MBTI 유형은 실제 404" "$BASE/mbti/type/XXXX" 404

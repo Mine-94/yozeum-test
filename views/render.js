@@ -1889,6 +1889,7 @@ function renderNotFound() {
     ogUrl: pageUrl,
     canonicalUrl: pageUrl,
     robots: 'noindex, follow',
+    allowAdvertising: false,
     content,
   });
 }
