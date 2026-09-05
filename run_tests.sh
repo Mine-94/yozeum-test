@@ -131,6 +131,7 @@ check_contains "홈에 저장형 오늘 운세 폼" "$BASE/" "data-save-birth-ye
 check_contains "홈에 접근성 본문 바로가기" "$BASE/" "본문으로 바로가기"
 check_contains "홈에 전역 주요 메뉴" "$BASE/" 'aria-label="주요 메뉴"'
 check_contains "전역 메뉴에 핵심 콘텐츠 링크" "$BASE/mbti/type/INFP" 'href="/unse">오늘운세'
+check_not_contains "홈에서 외부 웹폰트 요청 제거" "$BASE/" "cdn.jsdelivr.net"
 check_header_contains "홈 보안 헤더 nosniff" "$BASE/" "X-Content-Type-Options: nosniff"
 check_header_contains "홈 보안 헤더 referrer policy" "$BASE/" "Referrer-Policy: strict-origin-when-cross-origin"
 if curl -s -D - "$BASE/" -o /dev/null | grep -qi '^X-Powered-By:'; then

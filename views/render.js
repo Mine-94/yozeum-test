@@ -76,7 +76,6 @@ function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, conten
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 <link rel="manifest" href="/manifest.json" />
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 ${allowThirdPartyScripts && GA_MEASUREMENT_ID ? '<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />' : ''}
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
@@ -93,7 +92,6 @@ ${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${esc
 <meta name="twitter:description" content="${escapeHtml(description)}" />
 ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
 ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/css/style.css" />
 ${allowThirdPartyScripts && allowAdvertising && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
 ${allowThirdPartyScripts && GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
