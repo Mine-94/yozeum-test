@@ -162,7 +162,8 @@ check_contains "오류·정정 요청 ContactPage 구조화데이터" "$BASE/con
 check_contains "실제 공개 문의함 연결" "$BASE/contact" "github.com/Mine-94/yozeum-test/issues/new?template=site-feedback.md"
 check_contains "공개 범위와 개인정보 주의 안내" "$BASE/contact" "작성한 내용은 공개됩니다"
 check_contains "외부 문의 링크 보호 속성" "$BASE/contact" 'rel="noopener noreferrer"'
-check_not_contains "개인 Gmail 비공개 유지" "$BASE/contact" "@gmail.com"
+check_contains "승인된 공개 문의 이메일 표시" "$BASE/contact" "lichtbringer.studio@gmail.com"
+check_not_contains "개인 AdSense Gmail 비공개 유지" "$BASE/contact" "jminwoo94@gmail.com"
 check_contains "전역 푸터에서 정정 요청 경로 연결" "$BASE/mbti" 'href="/contact">오류·정정 요청'
 check_status "읽을거리 허브" "$BASE/guides" 200
 check_contains "읽을거리 허브에 CollectionPage 구조화데이터" "$BASE/guides" '"@type":"CollectionPage"'
@@ -179,8 +180,10 @@ check_contains "이용약관 canonical" "$BASE/terms.html" 'rel="canonical" href
 check_contains "개인정보처리방침에서 정정 요청 경로 연결" "$BASE/privacy.html" 'href="/contact"'
 check_contains "이용약관에서 정정 요청 경로 연결" "$BASE/terms.html" 'href="/contact"'
 check_contains "개인정보처리방침에 분석 정보 항목" "$BASE/privacy.html" "방문 페이지, 유입 경로"
+check_contains "개인정보처리방침에 문의 이메일 처리 항목" "$BASE/privacy.html" "문의 이메일을 보내면"
+check_contains "개인정보 문의 연락처 표시" "$BASE/privacy.html" "lichtbringer.studio@gmail.com"
 check_contains "개인정보처리방침에 Google 정책 링크" "$BASE/privacy.html" "policies.google.com/privacy"
-check_contains "개인정보처리방침에서 실제 수집 범위 명시" "$BASE/privacy.html" "회원 계정, 이름, 전화번호, 이메일을 직접 수집하는 기능을 현재 제공하지 않습니다"
+check_contains "개인정보처리방침에서 사이트 입력 수집 범위 명시" "$BASE/privacy.html" "회원가입이나 사이트 입력란을 통해"
 check_status "확장자 없는 개인정보 주소는 정규 URL로 영구 이동" "$BASE/privacy" 301
 check_redirect_location "개인정보 주소 정규화" "$BASE/privacy" "/privacy.html"
 check_status "확장자 없는 약관 주소는 정규 URL로 영구 이동" "$BASE/terms" 301
@@ -257,6 +260,8 @@ check_contains "MBTI 테스트 문항 수 안내" "$BASE/mbti/test" "총 20개 �
 check_contains "MBTI 테스트 클라이언트 스크립트" "$BASE/mbti/test" "/js/mbti-test.js"
 check_contains "MBTI 시작 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_start"
 check_contains "MBTI 완료 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_complete"
+check_contains "MBTI 테스트에 공식 검사 아님 FAQ" "$BASE/mbti/test" "공식 MBTI 검사인가요?"
+check_contains "MBTI 테스트에 답변 저장 FAQ" "$BASE/mbti/test" "답변은 서버에 저장되나요?"
 for type in ISTJ ISFJ INFJ INTJ ISTP ISFP INFP INTP ESTP ESFP ENFP ENTP ESTJ ESFJ ENFJ ENTJ; do
   check_status "MBTI 유형 페이지: $type" "$BASE/mbti/type/$type" 200
 done
@@ -418,6 +423,9 @@ for a in rat ox tiger rabbit dragon snake horse goat monkey rooster dog pig; do
 done
 check_contains "운세 홈에 12띠 모두 노출" "$BASE/unse" "쥐띠"
 check_contains "운세 홈에 출생연도 저장 기능" "$BASE/unse" "data-save-birth-year"
+check_contains "운세 홈에 이용 방법" "$BASE/unse" "오늘 운세 이용 방법"
+check_contains "운세 홈에 미래 예측 한계 FAQ" "$BASE/unse" "운세가 실제 미래를 예측하나요?"
+check_valid_jsonld "운세 홈" "$BASE/unse"
 check_contains "운세 결과에 띠 저장 기능" "$BASE/unse/rat" 'data-save-zodiac="rat"'
 check_contains "운세 결과에 띠별 고유 활용 가이드" "$BASE/unse/rat" "필요한 정보와 비용부터"
 check_contains "띠별 운세 결과 메타 색인 제외" "$BASE/unse/rat" 'name="robots" content="noindex, follow"'
@@ -431,6 +439,8 @@ echo "=== 띠 궁합 ==="
 check_status "궁합 폼" "$BASE/gunghap" 200
 check_contains "궁합 폼에 계산 원리 설명" "$BASE/gunghap" "띠 궁합은 어떻게 계산하나요?"
 check_contains "궁합 폼에 점수를 만들지 않는 원칙" "$BASE/gunghap" "임의의 퍼센트를 만들거나"
+check_contains "궁합 폼에 근거 없는 퍼센트 FAQ" "$BASE/gunghap" "궁합 퍼센트가 없는 이유는 무엇인가요?"
+check_valid_jsonld "띠 궁합 폼" "$BASE/gunghap"
 check_redirect_location "compute→결과 리다이렉트" "$BASE/gunghap/compute?my=tiger&partner=horse" "/gunghap/r/tiger/horse"
 check_contains "인오술 삼합 관계 판정" "$BASE/gunghap/r/tiger/horse" "삼합"
 check_contains "자오 충 관계 판정" "$BASE/gunghap/r/rat/horse" "충"

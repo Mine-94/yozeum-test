@@ -25,6 +25,7 @@ const SITE_URL = configuredSiteUrl === 'https://yozeum-test.onrender.com' ? OFFI
 const NAVER_SITE_VERIFICATION = process.env.NAVER_SITE_VERIFICATION || '';
 const ADSENSE_CLIENT_ID = process.env.ADSENSE_CLIENT_ID || ''; // 예: ca-pub-8602848692420724
 const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || 'G-YMN47H27JQ';
+const PUBLIC_CONTACT_EMAIL = 'lichtbringer.studio@gmail.com';
 
 const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -519,6 +520,12 @@ function renderContactPage() {
       url: contactUrl,
       inLanguage: 'ko-KR',
       isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+      mainEntity: {
+        '@type': 'Organization',
+        name: `${SITE_NAME} 운영자`,
+        url: `${SITE_URL}/`,
+        email: PUBLIC_CONTACT_EMAIL,
+      },
     },
     {
       '@context': 'https://schema.org',
@@ -535,7 +542,7 @@ function renderContactPage() {
     <div class="container">
       <a href="/" class="logo">${SITE_NAME}</a>
       <h1>오류·정정 요청</h1>
-      <p class="tagline">계산 오류나 설명의 문제를 확인하면 근거와 함께 알려주세요</p>
+      <p class="tagline">이메일 또는 공개 문의함으로 계산 오류와 설명 문제를 알려주세요</p>
     </div>
   </header>
 
@@ -552,8 +559,12 @@ function renderContactPage() {
 
     <section class="info-card">
       <h2>요청을 남기는 방법</h2>
-      <p>아래 버튼을 누르면 요즘테스트의 공개 GitHub 문의함으로 이동합니다. 문제가 발생한 페이지 주소, 실제로 본 내용, 기대한 결과를 적어주세요. GitHub 로그인이 필요합니다.</p>
-      <p><strong>작성한 내용은 공개됩니다.</strong> 이름, 이메일, 생년월일, 출생시간, 계정 정보처럼 개인을 식별할 수 있는 내용은 적지 마세요.</p>
+      <h3>이메일 문의</h3>
+      <p>공개되지 않는 문의는 <a href="mailto:${PUBLIC_CONTACT_EMAIL}">${PUBLIC_CONTACT_EMAIL}</a>로 보내주세요. 문제가 발생한 페이지 주소, 실제로 본 내용, 기대한 결과를 적으면 확인에 도움이 됩니다.</p>
+      <p>생년월일·출생시간, 계정 정보, 건강·금융 정보처럼 민감한 내용은 보내지 마세요. 문의 과정의 개인정보 처리는 <a href="/privacy.html">개인정보처리방침</a>에서 확인할 수 있습니다.</p>
+      <h3>공개 오류 제보</h3>
+      <p>아래 버튼을 누르면 요즘테스트의 공개 GitHub 문의함으로 이동합니다. GitHub 로그인이 필요합니다.</p>
+      <p><strong>GitHub에 작성한 내용은 공개됩니다.</strong> 이름, 이메일, 생년월일, 출생시간, 계정 정보처럼 개인을 식별할 수 있는 내용은 적지 마세요.</p>
       <p><a class="quiz-btn" href="${feedbackUrl}" target="_blank" rel="noopener noreferrer">공개 오류·정정 요청 작성하기</a></p>
     </section>
 
@@ -566,7 +577,7 @@ function renderContactPage() {
 
   return baseLayout({
     title: `오류·정정 요청 - ${SITE_NAME}`,
-    description: '요즘테스트의 계산 오류, 깨진 기능, 사실관계와 표현 문제를 알리는 방법을 확인하세요.',
+    description: '요즘테스트의 계산 오류, 깨진 기능, 사실관계와 표현 문제를 이메일 또는 공개 문의함으로 알리는 방법을 확인하세요.',
     ogUrl: contactUrl,
     content,
     structuredData,
@@ -828,6 +839,24 @@ function renderMbtiHome(types, axisInfo) {
 
 function renderMbtiTest(questions, axisInfo) {
   const pageUrl = `${SITE_URL}/mbti/test`;
+  const faqItems = [
+    {
+      question: '공식 MBTI 검사인가요?',
+      answer: '아닙니다. 네 가지 선호 지표를 이해하기 위한 20문항 자기이해용 콘텐츠이며, The Myers-Briggs Company의 공식 검사나 전문 심리 평가를 대신하지 않습니다.',
+    },
+    {
+      question: '결과는 어떻게 계산하나요?',
+      answer: 'E/I, S/N, T/F, J/P 네 축마다 5개 문항을 배정합니다. 각 축에서 더 많이 선택한 방향을 한 글자로 정하고, 네 글자를 합쳐 결과 유형을 만듭니다.',
+    },
+    {
+      question: '할 때마다 결과가 달라져도 괜찮나요?',
+      answer: '괜찮습니다. 최근 경험과 질문을 읽는 상황에 따라 선택이 달라질 수 있고, 두 방향의 선택 수가 비슷하면 답 하나로 결과 글자가 바뀔 수 있습니다.',
+    },
+    {
+      question: '답변은 서버에 저장되나요?',
+      answer: '문항 선택과 점수 계산은 현재 브라우저 안에서 진행하며 답변 내용을 서버 데이터베이스에 저장하지 않습니다. 자세한 내용은 개인정보처리방침에서 확인할 수 있습니다.',
+    },
+  ];
   const axisList = axisInfo
     .map((axis) => `<li><strong>${axis.left}/${axis.right} ${escapeHtml(axis.title)}</strong> — ${escapeHtml(axis.description)}</li>`)
     .join('');
@@ -864,6 +893,14 @@ function renderMbtiTest(questions, axisInfo) {
       <p>각 축마다 5개 질문을 두고 선택한 횟수가 많은 글자를 결과에 반영합니다. 네 축을 합치면 ISTJ, ENFP처럼 하나의 유형이 됩니다.</p>
       <ul>${axisList}</ul>
       <p class="disclaimer">${MBTI_NOTICE}</p>
+    </section>
+    <section class="info-card faq-list">
+      <h2>MBTI 테스트 자주 묻는 질문</h2>
+      ${faqItems.map((item) => `<details>
+        <summary>${escapeHtml(item.question)}</summary>
+        <p>${escapeHtml(item.answer)}</p>
+      </details>`).join('')}
+      <p><a href="/guides/personality-test-results">결과가 달라지는 이유와 일치율 읽는 법 →</a></p>
     </section>
   </main>
   <script>window.__MBTI_QUESTIONS__=${safeQuestions};</script>
@@ -1606,6 +1643,25 @@ function renderUnseHome() {
   const todayKo = formatTodayKorean(dateStr);
   const todayShort = formatTodayKoreanShort(dateStr);
   const currentYear = currentYearKST();
+  const pageUrl = `${SITE_URL}/unse`;
+  const faqItems = [
+    {
+      question: '내 띠를 모르면 어떻게 찾나요?',
+      answer: '태어난 연도를 선택하면 해당 띠로 이동합니다. 다만 1~2월생은 입춘 전후에 따라 일반적인 연도 기준과 달라질 수 있으므로 사주팔자 계산기로 년주를 먼저 확인하는 편이 정확합니다.',
+    },
+    {
+      question: '같은 날 다시 보면 결과가 바뀌나요?',
+      answer: '같은 한국 날짜와 같은 띠에는 같은 문구가 표시됩니다. 날짜가 바뀌면 총운·애정운·금전운·건강운 문구도 함께 바뀝니다.',
+    },
+    {
+      question: '운세가 실제 미래를 예측하나요?',
+      answer: '아닙니다. 날짜와 띠를 기준으로 문구를 조합한 재미 콘텐츠입니다. 건강, 투자, 진로, 관계처럼 중요한 결정의 근거로 사용하지 마세요.',
+    },
+    {
+      question: '띠를 저장하면 개인정보가 전송되나요?',
+      answer: '저장 기능은 선택한 띠 또는 태어난 연도를 현재 브라우저의 로컬 저장소에 보관합니다. 이 값은 회원 정보와 결합하거나 사이트 서버 데이터베이스에 저장하지 않습니다.',
+    },
+  ];
 
   const cards = TTI_ORDER.map((key) => {
     const info = TTI_CONTENT[key];
@@ -1652,14 +1708,51 @@ function renderUnseHome() {
 
 
     ${findFormHtml}
+    <section class="info-card">
+      <h2>오늘 운세 이용 방법</h2>
+      <ol class="result-desc" style="text-align:left;line-height:1.8;padding-left:20px;">
+        <li>내 띠를 직접 고르거나 태어난 연도로 찾습니다.</li>
+        <li>총운·애정운·금전운·건강운 중 지금 상황과 가까운 항목만 읽습니다.</li>
+        <li>결과가 맞지 않으면 억지로 적용하지 않고 가벼운 참고로 끝냅니다.</li>
+      </ol>
+      <p><a href="/guides/zodiac-compatibility">띠와 지지 관계를 이해하는 기본 가이드 →</a></p>
+    </section>
+    <section class="info-card faq-list">
+      <h2>오늘의 띠별 운세 자주 묻는 질문</h2>
+      ${faqItems.map((item) => `<details>
+        <summary>${escapeHtml(item.question)}</summary>
+        <p>${escapeHtml(item.answer)}</p>
+      </details>`).join('')}
+    </section>
   </main>`;
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `${todayShort} 오늘의 띠별 운세`,
+      description: `${todayKo} 기준 12띠 총운·애정운·금전운·건강운과 이용 방법을 안내합니다.`,
+      url: pageUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '오늘의 띠별 운세', item: pageUrl },
+      ],
+    },
+  ];
 
   return baseLayout({
     title: `${todayShort} 오늘의 띠별 운세 무료 - ${SITE_NAME}`,
     description: `${todayShort} 오늘의 띠별 운세 무료로 확인하세요. ${todayKo} 기준 12띠 총운·애정운·금전운·건강운을 확인해보세요.`,
-    ogUrl: `${SITE_URL}/unse`,
+    ogUrl: pageUrl,
     themeColor: '#c9622a',
     content,
+    structuredData,
   });
 }
 
@@ -1751,6 +1844,25 @@ const GUNGHAP_FEATURED = [
 ];
 
 function renderGunghapForm({ prefillMy } = {}) {
+  const pageUrl = `${SITE_URL}/gunghap`;
+  const faqItems = [
+    {
+      question: '삼합·육합·충은 무엇인가요?',
+      answer: '삼합은 세 지지가 한 흐름으로 묶이는 관계, 육합은 두 지지가 짝을 이루는 관계, 충은 서로 마주 보는 지지 관계를 뜻합니다. 이 도구는 두 띠가 어느 관계에 해당하는지 확인합니다.',
+    },
+    {
+      question: '충으로 나오면 나쁜 궁합인가요?',
+      answer: '반드시 그렇지는 않습니다. 충은 차이와 변화가 두드러질 수 있다는 전통적 분류입니다. 실제 관계는 대화 방식, 가치관, 생활 환경처럼 띠만으로 알 수 없는 요소의 영향을 더 많이 받습니다.',
+    },
+    {
+      question: '궁합 퍼센트가 없는 이유는 무엇인가요?',
+      answer: '띠 두 글자만으로 관계의 성공 가능성을 수치화할 객관적인 근거가 없기 때문입니다. 근거 없는 점수를 만들지 않고 확인 가능한 지지 관계와 해석 범위만 보여줍니다.',
+    },
+    {
+      question: '1~2월생은 어떤 띠를 골라야 하나요?',
+      answer: '사주에서는 보통 입춘을 해의 경계로 사용합니다. 입춘과 가까운 날짜에 태어났다면 출생연도만으로 고르지 말고 사주팔자 계산기에서 년주를 확인한 뒤 선택하세요.',
+    },
+  ];
   const options = (selected) =>
     TTI_ORDER.map((key) => {
       const info = TTI_CONTENT[key];
@@ -1793,7 +1905,35 @@ function renderGunghapForm({ prefillMy } = {}) {
       <h2>결과를 활용하는 방법</h2>
       <p>편한 점과 부딪히기 쉬운 점을 대화의 출발점으로만 사용해주세요. 특히 1~2월생은 입춘 전후에 따라 일반적인 출생연도 기준 띠와 사주에서 사용하는 띠가 달라질 수 있으므로, 정확한 확인이 필요하면 사주팔자 계산기를 이용하는 편이 좋습니다.</p>
       <p class="disclaimer">명리학의 상징 체계를 설명하는 재미 콘텐츠이며 관계의 성공, 결혼 생활 또는 미래를 예측하지 않습니다.</p>
+    </section>
+    <section class="info-card faq-list">
+      <h2>띠 궁합 자주 묻는 질문</h2>
+      ${faqItems.map((item) => `<details>
+        <summary>${escapeHtml(item.question)}</summary>
+        <p>${escapeHtml(item.answer)}</p>
+      </details>`).join('')}
+      <p><a href="/guides/zodiac-compatibility">삼합·육합·충을 더 자세히 읽기 →</a></p>
     </section>`;
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: `무료 띠 궁합 보기 - ${SITE_NAME}`,
+      description: '두 띠의 삼합·육합·충 관계와 계산 기준, 결과의 한계와 활용 방법을 안내합니다.',
+      url: pageUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: '띠 궁합', item: pageUrl },
+      ],
+    },
+  ];
 
   return formPageShell({
     accent: '#b0473e',
@@ -1801,8 +1941,9 @@ function renderGunghapForm({ prefillMy } = {}) {
     title: '무료 띠 궁합 보기',
     subtitle: '삼합·육합·충 — 실제 지지 이론으로 보는 두 띠의 궁합',
     formHtml,
-    ogUrl: `${SITE_URL}/gunghap`,
+    ogUrl: pageUrl,
     description: '무료로 두 띠를 선택하면 삼합·육합·충 등 명리학의 지지 관계 이론으로 궁합을 확인할 수 있어요.',
+    structuredData,
     extraHtml,
   });
 }

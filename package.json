@@ -16,5 +16,8 @@
     "express-rate-limit": "^7.4.0",
     "lunar-javascript": "^1.7.7"
   },
+  "overrides": {
+    "qs": "6.16.0"
+  },
   "license": "MIT"
 }
