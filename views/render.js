@@ -68,6 +68,9 @@ function serializeJsonLd(data) {
 
 function baseLayout({ title, description, ogUrl, canonicalUrl, bodyClass, content, themeColor, structuredData, robots, allowThirdPartyScripts = true, allowAdvertising = true }) {
   const accessibleContent = content.replace(/<main(?![^>]*\bid=)/, '<main id="main-content"');
+  // 색인에서 제외한 결과·오류 화면은 광고 인벤토리에서도 제외합니다.
+  // 새 noindex 화면이 추가될 때 광고 차단 옵션을 빠뜨려도 AdSense가 로드되지 않게 합니다.
+  const advertisingEnabled = allowAdvertising && !/\bnoindex\b/i.test(robots || '');
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -94,7 +97,7 @@ ${NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${esc
 ${themeColor ? `<meta name="theme-color" content="${themeColor}" />` : ''}
 ${structuredData ? `<script type="application/ld+json">${serializeJsonLd(structuredData)}</script>` : ''}
 <link rel="stylesheet" href="/css/style.css" />
-${allowThirdPartyScripts && allowAdvertising && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
+${allowThirdPartyScripts && advertisingEnabled && ADSENSE_CLIENT_ID ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeHtml(ADSENSE_CLIENT_ID)}" crossorigin="anonymous"></script>` : ''}
 ${allowThirdPartyScripts && GA_MEASUREMENT_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeHtml(GA_MEASUREMENT_ID)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${escapeHtml(GA_MEASUREMENT_ID)}');</script>` : ''}
 </head>
@@ -1085,6 +1088,7 @@ function renderMbtiCompatibilityResult(firstCode, first, secondCode, second) {
     description: `${firstCode}와 ${secondCode}의 대화, 정보 이해, 갈등 해결, 생활 리듬을 네 가지 MBTI 축으로 비교합니다.`,
     backHref: '/mbti/compatibility', backLabel: '다른 유형 비교하기', shareUrl: pageUrl,
     shareText: `${firstCode}와 ${secondCode}의 MBTI 관계 특징을 함께 살펴봐요.`, structuredData,
+    robots: 'noindex, follow',
   });
 }
 
@@ -1297,6 +1301,7 @@ function renderResultPage(quiz, resultKey, matchScore) {
     themeColor: quiz.themeColor,
     content,
     structuredData,
+    robots: 'noindex, follow',
   });
 }
 
@@ -2003,6 +2008,7 @@ function renderGunghapResult(myKey, partnerKey, relation) {
     shareUrl,
     shareText: `${my.name}띠 × ${partner.name}띠 궁합은 ${rel.label}! 🔮`,
     structuredData,
+    robots: 'noindex, follow',
   });
 }
 
