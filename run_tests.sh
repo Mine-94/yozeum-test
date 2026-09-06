@@ -295,6 +295,8 @@ check_status "MBTI 궁합 결과" "$BASE/mbti/compatibility/ENFJ/INFP" 200
 check_contains "MBTI 궁합 네 축 비교" "$BASE/mbti/compatibility/ENFJ/INFP" "에너지와 대화 속도"
 check_contains "MBTI 궁합은 예측·점수화하지 않음" "$BASE/mbti/compatibility/ENFJ/INFP" "성공 가능성을 예측하거나 점수화하지 않습니다"
 check_header_contains "MBTI 궁합 조합 결과 색인 제외" "$BASE/mbti/compatibility/ENFJ/INFP" "X-Robots-Tag: noindex, follow"
+check_contains "MBTI 궁합 조합 결과 메타 색인 제외" "$BASE/mbti/compatibility/ENFJ/INFP" 'name="robots" content="noindex, follow"'
+check_not_contains "MBTI 궁합 조합 결과 광고 제외" "$BASE/mbti/compatibility/ENFJ/INFP" "pagead2.googlesyndication.com"
 check_contains "MBTI 궁합 결과 공유 URL에 유입 식별값" "$BASE/mbti/compatibility/ENFJ/INFP" "utm_campaign=result_share"
 check_status "역순 MBTI 궁합 URL은 정규 URL로 영구 이동" "$BASE/mbti/compatibility/INFP/ENFJ" 301
 check_redirect_location "역순 MBTI 궁합 URL 정규화" "$BASE/mbti/compatibility/INFP/ENFJ" "/mbti/compatibility/ENFJ/INFP"
@@ -309,6 +311,8 @@ check_contains "퀴즈 페이지에 고유 해석 가이드" "$BASE/q/meta-sensi
 check_contains "밸런스게임 제목과 실제 문항 수 일치" "$BASE/q/balance-game" "총 20개 문항"
 check_contains "퀴즈 결과에 채점 설명" "$BASE/q/meta-sensing/r/detective" "이 결과는 어떻게 정해졌나요?"
 check_header_contains "퀴즈 결과 페이지 색인 제외" "$BASE/q/meta-sensing/r/detective" "X-Robots-Tag: noindex, follow"
+check_contains "퀴즈 결과 페이지 메타 색인 제외" "$BASE/q/meta-sensing/r/detective" 'name="robots" content="noindex, follow"'
+check_not_contains "퀴즈 결과 페이지 광고 제외" "$BASE/q/meta-sensing/r/detective" "pagead2.googlesyndication.com"
 check_status "존재하지 않는 퀴즈는 실제 404" "$BASE/q/nope" 404
 check_contains "404 페이지에 검색 제외 메타" "$BASE/q/nope" 'name="robots" content="noindex, follow"'
 check_header_contains "404 페이지에 검색 제외 헤더" "$BASE/q/nope" "X-Robots-Tag: noindex, follow"
@@ -449,6 +453,8 @@ check_contains "신자진 삼합 관계 판정" "$BASE/gunghap/r/rat/dragon" "�
 check_contains "동갑띠 판정" "$BASE/gunghap/r/rat/rat" "동갑띠"
 check_contains "평범한 관계 판정(무관계 쌍)" "$BASE/gunghap/r/rat/tiger" "평범한 관계"
 check_header_contains "궁합 결과 페이지 색인 제외" "$BASE/gunghap/r/rat/tiger" "X-Robots-Tag: noindex, follow"
+check_contains "궁합 결과 페이지 메타 색인 제외" "$BASE/gunghap/r/rat/tiger" 'name="robots" content="noindex, follow"'
+check_not_contains "궁합 결과 페이지 광고 제외" "$BASE/gunghap/r/rat/tiger" "pagead2.googlesyndication.com"
 check_status "역순 궁합 URL은 정규 URL로 영구 리다이렉트" "$BASE/gunghap/r/horse/tiger" 301
 check_redirect_location "역순 궁합 URL 정규화" "$BASE/gunghap/r/horse/tiger" "/gunghap/r/tiger/horse"
 check_status "잘못된 띠 파라미터는 실제 404" "$BASE/gunghap/r/xxx/yyy" 404
