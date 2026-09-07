@@ -258,6 +258,7 @@ check_contains "MBTI 허브 CollectionPage 구조화데이터" "$BASE/mbti" '"@t
 check_status "MBTI 20문항 테스트" "$BASE/mbti/test" 200
 check_contains "MBTI 테스트 문항 수 안내" "$BASE/mbti/test" "총 20개 문항"
 check_contains "MBTI 테스트 클라이언트 스크립트" "$BASE/mbti/test" "/js/mbti-test.js"
+check_not_contains "MBTI 진행 화면 광고 제외" "$BASE/mbti/test" "pagead2.googlesyndication.com"
 check_contains "MBTI 시작 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_start"
 check_contains "MBTI 완료 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_complete"
 check_contains "MBTI 테스트에 공식 검사 아님 FAQ" "$BASE/mbti/test" "공식 MBTI 검사인가요?"
@@ -287,6 +288,7 @@ check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=4
 check_contains "테스트 결과 반대 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "80% I"
 check_status "MBTI 궁합 선택 폼" "$BASE/mbti/compatibility" 200
 check_contains "MBTI 궁합 폼에 도구 식별값" "$BASE/mbti/compatibility" 'data-tool-id="mbti_compatibility"'
+check_not_contains "MBTI 궁합 선택 화면 광고 제외" "$BASE/mbti/compatibility" "pagead2.googlesyndication.com"
 check_contains "MBTI 궁합에 점수화하지 않는 원칙" "$BASE/mbti/compatibility" "좋고 나쁜 조합을 단정하는 대신"
 check_contains "MBTI 궁합에 친구 초대 기능" "$BASE/mbti/compatibility?first=INFP" "내 유형을 담아 초대하기"
 check_contains "MBTI 친구 초대 스크립트" "$BASE/js/compat-invite.js" "mbti_friend_invite"
@@ -306,6 +308,7 @@ echo "=== 기존 퀴즈 회귀 테스트 ==="
 check_status "퀴즈 페이지" "$BASE/q/meta-sensing" 200
 check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
 check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8개 문항"
+check_not_contains "퀴즈 진행 화면 광고 제외" "$BASE/q/meta-sensing" "pagead2.googlesyndication.com"
 check_contains "퀴즈 페이지에 결과 유형 설명" "$BASE/q/meta-sensing" "어떤 결과 유형이 있나요?"
 check_contains "퀴즈 페이지에 고유 해석 가이드" "$BASE/q/meta-sensing" "감정이 생긴 순간을 알아차리는지"
 check_contains "밸런스게임 제목과 실제 문항 수 일치" "$BASE/q/balance-game" "총 20개 문항"
@@ -385,6 +388,7 @@ check_valid_jsonld "띠 궁합 결과의 JSON-LD 유효성" "$BASE/gunghap/r/tig
 echo ""
 echo "=== 사주팔자 계산기 ==="
 check_status "사주 폼" "$BASE/saju" 200
+check_not_contains "사주 입력 화면 광고 제외" "$BASE/saju" "pagead2.googlesyndication.com"
 check_contains "사주 폼 H1에 무료 만세력 검색어" "$BASE/saju" "무료 만세력·사주팔자 오행 계산기"
 check_contains "사주 폼 메타 설명에 양력·절기·오행 정보" "$BASE/saju" "무료 만세력과 사주팔자 오행 계산기"
 check_contains "사주 폼에 FAQ 구조화데이터" "$BASE/saju" '"@type":"FAQPage"'
@@ -441,6 +445,7 @@ check_status "잘못된 띠 파라미터는 실제 404" "$BASE/unse/notanaimal" 
 echo ""
 echo "=== 띠 궁합 ==="
 check_status "궁합 폼" "$BASE/gunghap" 200
+check_not_contains "띠 궁합 선택 화면 광고 제외" "$BASE/gunghap" "pagead2.googlesyndication.com"
 check_contains "궁합 폼에 계산 원리 설명" "$BASE/gunghap" "띠 궁합은 어떻게 계산하나요?"
 check_contains "궁합 폼에 점수를 만들지 않는 원칙" "$BASE/gunghap" "임의의 퍼센트를 만들거나"
 check_contains "궁합 폼에 근거 없는 퍼센트 FAQ" "$BASE/gunghap" "궁합 퍼센트가 없는 이유는 무엇인가요?"
