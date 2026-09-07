@@ -213,6 +213,8 @@ function formPageShell({ accent, emoji, title, subtitle, formHtml, ogUrl, descri
     themeColor: accent,
     content,
     structuredData,
+    // 입력·선택 버튼에 집중하는 화면에서는 자동 광고가 상호작용을 방해하지 않게 합니다.
+    allowAdvertising: false,
   });
 }
 
@@ -922,6 +924,7 @@ function renderMbtiTest(questions, axisInfo) {
     title: `무료 MBTI 성격 유형 테스트 20문항 - ${SITE_NAME}`,
     description: '일상 행동을 묻는 20개 문항으로 E/I, S/N, T/F, J/P 선호를 확인하고 16가지 MBTI 유형 설명까지 읽어보세요.',
     ogUrl: pageUrl, themeColor: '#6657c7', content, structuredData,
+    allowAdvertising: false,
   });
 }
 
@@ -1219,6 +1222,7 @@ function renderQuizPage(quiz) {
     themeColor: quiz.themeColor,
     content,
     structuredData,
+    allowAdvertising: false,
   });
 }
 
