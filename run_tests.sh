@@ -424,6 +424,7 @@ check_status "시간 파라미터 조작(abc)은 실제 404" "$BASE/saju/r/1990/
 echo ""
 echo "=== 오늘의 띠별 운세 ==="
 check_status "운세 홈" "$BASE/unse" 200
+check_not_contains "운세 선택 화면 광고 제외" "$BASE/unse" "pagead2.googlesyndication.com"
 for a in rat ox tiger rabbit dragon snake horse goat monkey rooster dog pig; do
   check_status "운세 개별 페이지: $a" "$BASE/unse/$a" 200
   check_header_contains "운세 개별 페이지 색인 제외: $a" "$BASE/unse/$a" "X-Robots-Tag: noindex, follow"
