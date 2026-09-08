@@ -1762,6 +1762,8 @@ function renderUnseHome() {
     themeColor: '#c9622a',
     content,
     structuredData,
+    // 띠 카드와 출생연도 선택이 핵심인 화면에서는 자동 광고가 선택 동선을 방해하지 않게 합니다.
+    allowAdvertising: false,
   });
 }
 
