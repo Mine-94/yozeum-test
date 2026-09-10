@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const introEl = document.getElementById('quiz-intro');
   const playEl = document.getElementById('quiz-play');
+  const progressEl = document.getElementById('quiz-progress');
   const progressBar = document.getElementById('progress-bar');
   const questionCountEl = document.getElementById('question-count');
   const questionTextEl = document.getElementById('question-text');
@@ -21,8 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderQuestion() {
     const question = quiz.questions[currentIndex];
-    questionCountEl.textContent = `${currentIndex + 1} / ${quiz.questions.length}`;
-    progressBar.style.width = `${(currentIndex / quiz.questions.length) * 100}%`;
+    const questionNumber = currentIndex + 1;
+    questionCountEl.textContent = `${questionNumber} / ${quiz.questions.length}`;
+    progressBar.style.width = `${(questionNumber / quiz.questions.length) * 100}%`;
+    progressEl.setAttribute('aria-valuenow', String(questionNumber));
+    progressEl.setAttribute('aria-valuetext', `${questionNumber} / ${quiz.questions.length}번째 문항`);
     questionTextEl.textContent = question.text;
 
     optionsListEl.innerHTML = '';
@@ -33,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => selectOption(option));
       optionsListEl.appendChild(btn);
     });
+    questionTextEl.focus();
   }
 
   function selectOption(option) {
