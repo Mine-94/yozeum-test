@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     count.textContent = `${questionNumber} / ${questions.length}`;
     progress.style.width = `${(questionNumber / questions.length) * 100}%`;
     progressTrack.setAttribute('aria-valuenow', String(questionNumber));
-    progressTrack.setAttribute('aria-valuetext', `${questionNumber} / ${questions.length}번째 문항`);
+    progressTrack.setAttribute('aria-valuetext', `${questions.length}개 중 ${questionNumber}번째 문항`);
     question.textContent = item.text;
     left.textContent = item.leftLabel;
     right.textContent = item.rightLabel;
