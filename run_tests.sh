@@ -259,6 +259,9 @@ check_status "MBTI 20문항 테스트" "$BASE/mbti/test" 200
 check_contains "MBTI 테스트 문항 수 안내" "$BASE/mbti/test" "총 20개 문항"
 check_contains "MBTI 테스트 클라이언트 스크립트" "$BASE/mbti/test" "/js/mbti-test.js"
 check_not_contains "MBTI 진행 화면 광고 제외" "$BASE/mbti/test" "pagead2.googlesyndication.com"
+check_contains "MBTI 진행률을 보조기기에 전달" "$BASE/mbti/test" 'role="progressbar"'
+check_contains "MBTI 문항을 선택지 그룹 이름으로 연결" "$BASE/mbti/test" 'aria-labelledby="mbti-question"'
+check_contains "MBTI 문항 변경 때 초점 이동" "$BASE/js/mbti-test.js" "question.focus()"
 check_contains "MBTI 시작 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_start"
 check_contains "MBTI 완료 이벤트를 공통 퍼널로 통합" "$BASE/js/mbti-test.js" "quiz_complete"
 check_contains "MBTI 테스트에 공식 검사 아님 FAQ" "$BASE/mbti/test" "공식 MBTI 검사인가요?"
@@ -309,6 +312,9 @@ check_status "퀴즈 페이지" "$BASE/q/meta-sensing" 200
 check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
 check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8개 문항"
 check_not_contains "퀴즈 진행 화면 광고 제외" "$BASE/q/meta-sensing" "pagead2.googlesyndication.com"
+check_contains "퀴즈 진행률을 보조기기에 전달" "$BASE/q/meta-sensing" 'role="progressbar"'
+check_contains "퀴즈 문항을 선택지 그룹 이름으로 연결" "$BASE/q/meta-sensing" 'aria-labelledby="question-text"'
+check_contains "퀴즈 문항 변경 때 초점 이동" "$BASE/js/quiz-app.js" "questionTextEl.focus()"
 check_contains "퀴즈 페이지에 결과 유형 설명" "$BASE/q/meta-sensing" "어떤 결과 유형이 있나요?"
 check_contains "퀴즈 페이지에 고유 해석 가이드" "$BASE/q/meta-sensing" "감정이 생긴 순간을 알아차리는지"
 check_contains "밸런스게임 제목과 실제 문항 수 일치" "$BASE/q/balance-game" "총 20개 문항"
