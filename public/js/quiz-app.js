@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     questionCountEl.textContent = `${questionNumber} / ${quiz.questions.length}`;
     progressBar.style.width = `${(questionNumber / quiz.questions.length) * 100}%`;
     progressEl.setAttribute('aria-valuenow', String(questionNumber));
-    progressEl.setAttribute('aria-valuetext', `${questionNumber} / ${quiz.questions.length}번째 문항`);
+    progressEl.setAttribute('aria-valuetext', `${quiz.questions.length}개 중 ${questionNumber}번째 문항`);
     questionTextEl.textContent = question.text;
 
     optionsListEl.innerHTML = '';
