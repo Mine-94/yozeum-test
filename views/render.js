@@ -884,10 +884,10 @@ function renderMbtiTest(questions, axisInfo) {
         <button type="button" id="mbti-start" class="quiz-btn">테스트 시작하기</button>
       </div>
       <div id="mbti-play" hidden>
-        <div class="mbti-progress-meta"><span id="mbti-count">1 / 20</span><span>한 문항씩 선택</span></div>
-        <div class="progress-track"><div id="mbti-progress" class="progress-fill"></div></div>
-        <h2 id="mbti-question" class="mbti-question"></h2>
-        <div class="mbti-answer-grid">
+        <div class="mbti-progress-meta"><span id="mbti-count" aria-live="polite">1 / 20</span><span>한 문항씩 선택</span></div>
+        <div id="mbti-progress-track" class="progress-track" role="progressbar" aria-label="MBTI 테스트 진행률" aria-valuemin="0" aria-valuemax="${questions.length}" aria-valuenow="0" aria-valuetext="시작 전"><div id="mbti-progress" class="progress-fill"></div></div>
+        <h2 id="mbti-question" class="mbti-question" tabindex="-1"></h2>
+        <div class="mbti-answer-grid" role="group" aria-labelledby="mbti-question">
           <button type="button" id="mbti-left" class="answer-btn"></button>
           <button type="button" id="mbti-right" class="answer-btn"></button>
         </div>
@@ -1200,10 +1200,10 @@ function renderQuizPage(quiz) {
       </div>
 
       <div id="quiz-play" hidden>
-        <div class="quiz-progress"><div class="quiz-progress-bar" id="progress-bar"></div></div>
-        <p class="quiz-question-count" id="question-count"></p>
-        <h2 id="question-text"></h2>
-        <div id="options-list" class="quiz-options"></div>
+        <div id="quiz-progress" class="quiz-progress" role="progressbar" aria-label="테스트 진행률" aria-valuemin="0" aria-valuemax="${quiz.questions.length}" aria-valuenow="0" aria-valuetext="시작 전"><div class="quiz-progress-bar" id="progress-bar"></div></div>
+        <p class="quiz-question-count" id="question-count" aria-live="polite"></p>
+        <h2 id="question-text" tabindex="-1"></h2>
+        <div id="options-list" class="quiz-options" role="group" aria-labelledby="question-text"></div>
       </div>
     </section>
 
