@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const intro = document.getElementById('mbti-intro');
   const play = document.getElementById('mbti-play');
   const count = document.getElementById('mbti-count');
+  const progressTrack = document.getElementById('mbti-progress-track');
   const progress = document.getElementById('mbti-progress');
   const question = document.getElementById('mbti-question');
   const left = document.getElementById('mbti-left');
@@ -20,11 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render() {
     const item = questions[index];
-    count.textContent = `${index + 1} / ${questions.length}`;
-    progress.style.width = `${(index / questions.length) * 100}%`;
+    const questionNumber = index + 1;
+    count.textContent = `${questionNumber} / ${questions.length}`;
+    progress.style.width = `${(questionNumber / questions.length) * 100}%`;
+    progressTrack.setAttribute('aria-valuenow', String(questionNumber));
+    progressTrack.setAttribute('aria-valuetext', `${questionNumber} / ${questions.length}번째 문항`);
     question.textContent = item.text;
     left.textContent = item.leftLabel;
     right.textContent = item.rightLabel;
+    question.focus();
   }
 
   function choose(letter) {
