@@ -310,6 +310,7 @@ echo ""
 echo "=== 기존 퀴즈 회귀 테스트 ==="
 check_status "퀴즈 페이지" "$BASE/q/meta-sensing" 200
 check_status "퀴즈 결과 페이지" "$BASE/q/meta-sensing/r/detective" 200
+check_not_contains "유형 테스트의 진단 표현 제거" "$BASE/q/vibe-shift" "자가진단"
 check_contains "퀴즈 페이지에 이용 안내" "$BASE/q/meta-sensing" "총 8개 문항"
 check_not_contains "퀴즈 진행 화면 광고 제외" "$BASE/q/meta-sensing" "pagead2.googlesyndication.com"
 check_contains "퀴즈 진행률을 보조기기에 전달" "$BASE/q/meta-sensing" 'role="progressbar"'
@@ -399,6 +400,8 @@ check_contains "사주 폼 H1에 무료 만세력 검색어" "$BASE/saju" "무�
 check_contains "사주 폼 메타 설명에 양력·절기·오행 정보" "$BASE/saju" "무료 만세력과 사주팔자 오행 계산기"
 check_contains "사주 폼에 FAQ 구조화데이터" "$BASE/saju" '"@type":"FAQPage"'
 check_contains "사주 폼에 출생시간 FAQ" "$BASE/saju" "태어난 시간을 몰라도 계산할 수 있나요?"
+check_contains "사주 계산 범위와 유파 차이 안내" "$BASE/saju" "명리학에는 유파와 해석 차이가 있으며"
+check_not_contains "사주 계산기의 정식 표현 제거" "$BASE/saju" "정식 사주"
 check_contains "사주 폼에 결과 읽는 순서" "$BASE/saju" "만세력 결과는 이 순서로 확인하세요"
 check_redirect_location "compute(시간있음)→결과 리다이렉트" "$BASE/saju/compute?year=1990&month=5&day=20&hour=14" "/saju/r/1990/5/20/14"
 check_status "결과(시간있음, 1990-05-20 14시)" "$BASE/saju/r/1990/5/20/14" 200
@@ -456,6 +459,7 @@ check_not_contains "띠 궁합 선택 화면 광고 제외" "$BASE/gunghap" "pag
 check_contains "궁합 폼에 계산 원리 설명" "$BASE/gunghap" "띠 궁합은 어떻게 계산하나요?"
 check_contains "궁합 폼에 점수를 만들지 않는 원칙" "$BASE/gunghap" "임의의 퍼센트를 만들거나"
 check_contains "궁합 폼에 근거 없는 퍼센트 FAQ" "$BASE/gunghap" "궁합 퍼센트가 없는 이유는 무엇인가요?"
+check_contains "궁합 결과에 실제 관계 예측 한계" "$BASE/gunghap/r/rat/tiger" "실제 관계를 판단하거나 예측하는 근거로 사용할 수 없습니다"
 check_valid_jsonld "띠 궁합 폼" "$BASE/gunghap"
 check_redirect_location "compute→결과 리다이렉트" "$BASE/gunghap/compute?my=tiger&partner=horse" "/gunghap/r/tiger/horse"
 check_contains "인오술 삼합 관계 판정" "$BASE/gunghap/r/tiger/horse" "삼합"
