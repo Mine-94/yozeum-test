@@ -4,8 +4,8 @@ const fortuneTools = [
   {
     id: 'saju',
     href: '/saju',
-    title: '정식 사주팔자 계산기',
-    subtitle: '생년월일(시)로 년·월·일·시주와 오행 분포까지, 절기 경계를 반영한 정식 계산',
+    title: '사주팔자 오행 계산기',
+    subtitle: '생년월일(시)로 년·월·일·시주와 오행 분포까지, 절기 경계를 반영한 계산',
     emoji: '🔮',
     themeColor: '#5b4b8a',
   },
