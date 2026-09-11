@@ -1404,7 +1404,7 @@ function renderSajuForm({ error } = {}) {
       <button type="submit" class="quiz-btn">무료 만세력 계산하기</button>
     </form>
     <p class="disclaimer" style="text-align:left;margin-top:16px;">입력값은 회원 정보나 별도 데이터베이스에 저장하지 않습니다. 다만 계산 결과 주소에는 생년월일과 시각이 포함되므로, 링크를 공유하면 상대방이 해당 정보를 볼 수 있습니다. 결과 페이지에는 Google Analytics와 AdSense를 불러오지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>에서 확인할 수 있어요.</p>
-    <p class="disclaimer" style="text-align:left;margin-top:16px;">본 계산기는 양력 생년월일(시)을 기준으로 절기(입춘 등)를 반영해 년·월·일·시주를 계산하는 정식 사주 계산기입니다. 다만 실제 사주 해석은 십성·용신·격국 등 훨씬 복잡한 요소를 함께 봐야 하므로, 본 결과는 오행 분포와 일간 기준의 간이 해설로 참고만 해주세요.</p>
+    <p class="disclaimer" style="text-align:left;margin-top:16px;">본 계산기는 양력 생년월일(시)과 절기(입춘 등)를 기준으로 년·월·일·시주와 기본 오행 분포를 보여줍니다. 명리학에는 유파와 해석 차이가 있으며, 십성·용신·격국 등은 다루지 않습니다. 결과는 전통 상징을 살펴보는 참고 자료로만 이용해주세요.</p>
     <div class="link-grid">
       <p class="link-grid-title">일간(日干)별 성격이 궁금하다면?</p>
       <div class="link-grid-items">
@@ -1510,8 +1510,8 @@ function renderSajuResult(year, month, day, timeSeg, saju) {
         : ''
     }
     <p class="disclaimer" style="text-align:left;margin-top:20px;">
-      · 띠는 사주학 정통 기준인 입춘(2월 4일 무렵)을 기준으로 계산돼요. 음력설이나 양력 1월 1일 기준으로 알고 계셨던 띠와 1~2월생의 경우 다를 수 있어요.<br/>
-      · 이 결과는 오행 분포와 일간 상징을 바탕으로 한 간이 해설이며, 실제 정통 사주 해석(십성·용신·격국 등)과는 다를 수 있어요. 재미로 참고해주세요.
+      · 띠는 사주에서 널리 쓰이는 입춘(2월 4일 무렵)을 해의 경계로 적용해 계산해요. 음력설이나 양력 1월 1일 기준으로 알고 계셨던 띠와 1~2월생의 경우 다를 수 있어요.<br/>
+      · 이 결과는 오행 분포와 일간 상징만 다루는 간이 해설입니다. 십성·용신·격국 등 다른 해석 요소는 포함하지 않으며, 유파에 따라 설명이 달라질 수 있어요.
     </p>
   `;
 
@@ -1585,9 +1585,9 @@ function renderIlganPage(stemRomanKey) {
     </div>
     <h2 style="font-size:1.05rem;margin:24px 0 10px;">${el}(${el === '목' ? '木' : el === '화' ? '火' : el === '토' ? '土' : el === '금' ? '金' : '水'}) 기운의 특징</h2>
     <p class="result-desc">${wx.trait}. ${wx.many}</p>
-    <p class="result-desc" style="margin-top:16px;">일간은 사주팔자 여덟 글자 중에서도 '나 자신'을 상징하는 가장 중요한 글자예요. 다만 실제 나의 일간이 무엇인지, 그리고 오행 전체 분포까지 정확히 알려면 정식 사주 계산이 필요해요.</p>
+    <p class="result-desc" style="margin-top:16px;">일간은 사주팔자 여덟 글자 중에서 '나 자신'을 상징하는 글자예요. 실제 내 일간과 기본 오행 분포를 확인하려면 생년월일시로 네 기둥을 계산해야 해요.</p>
     <div class="result-actions" style="margin-top:8px;">
-      <a href="/saju" class="quiz-btn">내 일간 정확히 계산하기 →</a>
+      <a href="/saju" class="quiz-btn">내 사주 네 기둥 계산하기 →</a>
     </div>
     <div class="link-grid">
       <p class="link-grid-title">다른 일간도 확인해보세요</p>
@@ -1595,7 +1595,7 @@ function renderIlganPage(stemRomanKey) {
         ${otherStemsHtml}
       </div>
     </div>
-    <p class="disclaimer" style="text-align:left;margin-top:20px;">이 페이지는 일간 하나만으로 보는 간이 상징·성격 해설이며, 실제 사주 해석은 년·월·일·시주 전체와 오행 분포, 십성·용신 등을 함께 봐야 훨씬 정확해요.</p>
+    <p class="disclaimer" style="text-align:left;margin-top:20px;">이 페이지는 일간 하나만으로 보는 간이 상징·성격 해설입니다. 년·월·일·시주 전체와 오행 분포, 십성·용신 등은 다루지 않으며 전문 상담을 대신하지 않습니다.</p>
   `;
 
   const pageTitle = `${ko}${el} 성격 — 일간 ${ko}일간이란?`;
@@ -1975,7 +1975,7 @@ function renderGunghapResult(myKey, partnerKey, relation) {
     <p class="result-desc">${my.desc}</p>
     <h2 style="font-size:1.02rem;margin:22px 0 8px;">${partner.name}띠는</h2>
     <p class="result-desc">${partner.desc}</p>
-    <p class="disclaimer" style="text-align:left;margin-top:16px;">이 결과는 명리학의 지지(地支) 관계 이론(삼합·육합·충) 중 두 띠 사이의 기본 관계만 본 참고용 콘텐츠예요. 실제 궁합은 생년월일시 전체를 함께 봐야 훨씬 정확해요 — <a href="/saju">사주팔자 계산기</a>도 확인해보세요.</p>
+    <p class="disclaimer" style="text-align:left;margin-top:16px;">이 결과는 명리학의 지지(地支) 관계 이론(삼합·육합·충) 중 두 띠 사이의 기본 관계만 설명합니다. 두 사람의 경험과 대화 방식, 생년월일시 전체를 반영하지 않으므로 실제 관계를 판단하거나 예측하는 근거로 사용할 수 없습니다.</p>
   `;
 
   const pageTitle = `${my.name}띠 × ${partner.name}띠 궁합은? (${rel.label})`;
