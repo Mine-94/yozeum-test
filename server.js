@@ -88,6 +88,22 @@ function findQuiz(id) {
   return quizzes.find((q) => q.id === id);
 }
 
+// 결과 화면의 비율은 실제 문항 수로 만들 수 있는 값만 허용합니다.
+// 클라이언트가 만든 URL의 s 값을 그대로 믿으면 임의의 퍼센트가 표시될 수 있습니다.
+function parseReachableQuizScore(quiz, rawScore) {
+  const raw = String(rawScore ?? '');
+  if (!/^\d{1,3}$/.test(raw)) return null;
+
+  const score = Number(raw);
+  const questionCount = quiz.questions.length;
+  const resultTypeCount = Object.keys(quiz.results).length;
+  const minimumWinningCount = Math.ceil(questionCount / resultTypeCount);
+  for (let count = minimumWinningCount; count <= questionCount; count += 1) {
+    if (Math.round((count / questionCount) * 100) === score) return score;
+  }
+  return null;
+}
+
 function notFound(res) {
   res.set('X-Robots-Tag', 'noindex, follow');
   return res.status(404).send(renderNotFound());
@@ -172,8 +188,13 @@ app.get('/mbti/type/:type', (req, res) => {
   if (!mbtiTypes[typeCode]) return notFound(res);
   if (req.params.type !== typeCode) return res.redirect(301, `/mbti/type/${typeCode}`);
 
-  const values = ['ei', 'sn', 'tf', 'jp'].map((key) => parseInt(req.query[key], 10));
-  const validBreakdown = values.every((value) => Number.isInteger(value) && value >= 0 && value <= 100);
+  const rawValues = ['ei', 'sn', 'tf', 'jp'].map((key) => String(req.query[key] ?? ''));
+  const values = rawValues.map(Number);
+  // 축마다 5문항이므로 실제 결과는 20% 단위이며, 네 글자와 우세 방향도 일치해야 합니다.
+  const breakdownType = values.map((value, index) => value > 50 ? ['E', 'S', 'T', 'J'][index] : ['I', 'N', 'F', 'P'][index]).join('');
+  const validBreakdown = rawValues.every((value) => /^\d{1,3}$/.test(value))
+    && values.every((value) => Number.isInteger(value) && value >= 0 && value <= 100 && value % 20 === 0)
+    && breakdownType === typeCode;
   const breakdown = validBreakdown
     ? [
         { title: '에너지 방향', left: 'E', right: 'I', leftValue: values[0], rightValue: 100 - values[0] },
@@ -220,10 +241,9 @@ app.get('/q/:id', (req, res) => {
 app.get('/q/:id/r/:resultKey', (req, res) => {
   const quiz = findQuiz(req.params.id);
   if (!quiz || !quiz.results[req.params.resultKey]) return notFound(res);
-  // 유형+점수 결합형: 클라이언트에서 계산한 "일치율"(?s=0~100)이 있으면 결과에 함께 표시.
-  // 값이 없거나 유효 범위를 벗어나면 조용히 무시하고 기존과 동일하게 렌더링(캐노니컬 URL은 그대로 유지).
-  const scoreRaw = parseInt(req.query.s, 10);
-  const matchScore = Number.isInteger(scoreRaw) && scoreRaw >= 0 && scoreRaw <= 100 ? scoreRaw : null;
+  // 클라이언트에서 계산한 일치율 중 실제 문항 수로 나올 수 있는 값만 표시합니다.
+  // 값이 없거나 도달할 수 없는 비율이면 조용히 무시합니다(캐노니컬 URL은 그대로 유지).
+  const matchScore = parseReachableQuizScore(quiz, req.query.s);
   res.set('X-Robots-Tag', 'noindex, follow');
   res.send(renderResultPage(quiz, req.params.resultKey, matchScore));
 });
