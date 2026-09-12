@@ -289,6 +289,8 @@ check_status "소문자 MBTI 유형은 정규 URL로 영구 이동" "$BASE/mbti/
 check_redirect_location "소문자 유형 URL 정규화" "$BASE/mbti/type/infp" "/mbti/type/INFP"
 check_contains "테스트 결과 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "E 20%"
 check_contains "테스트 결과 반대 비율 표시" "$BASE/mbti/type/INFP?ei=20&sn=40&tf=20&jp=20" "80% I"
+check_not_contains "MBTI에서 5문항으로 만들 수 없는 비율 제외" "$BASE/mbti/type/INFP?ei=21&sn=40&tf=20&jp=20" "E 21%"
+check_not_contains "MBTI 유형과 모순되는 비율 제외" "$BASE/mbti/type/INFP?ei=80&sn=40&tf=20&jp=20" "E 80%"
 check_status "MBTI 궁합 선택 폼" "$BASE/mbti/compatibility" 200
 check_contains "MBTI 궁합 폼에 도구 식별값" "$BASE/mbti/compatibility" 'data-tool-id="mbti_compatibility"'
 check_not_contains "MBTI 궁합 선택 화면 광고 제외" "$BASE/mbti/compatibility" "pagead2.googlesyndication.com"
@@ -344,8 +346,10 @@ check_redirect_location "Render 기본 주소 리다이렉트 목적지" "$BASE/
 
 echo ""
 echo "=== 유형+점수(일치율) 결합형 결과 ==="
-check_status "점수 파라미터 포함 결과 페이지" "$BASE/q/meta-sensing/r/detective?s=87" 200
-check_contains "점수 파라미터 있으면 일치율 표시" "$BASE/q/meta-sensing/r/detective?s=87" "87%"
+check_status "점수 파라미터 포함 결과 페이지" "$BASE/q/meta-sensing/r/detective?s=88" 200
+check_contains "실제 문항 수로 가능한 일치율 표시" "$BASE/q/meta-sensing/r/detective?s=88" "88%"
+check_not_contains "실제 문항 수로 불가능한 일치율 제외" "$BASE/q/meta-sensing/r/detective?s=87" "87%"
+check_not_contains "문자가 붙은 점수 파라미터 제외" "$BASE/q/meta-sensing/r/detective?s=88abc" "88%"
 if curl -s "$BASE/q/meta-sensing/r/detective" -o /tmp/yozeum_resp.html && ! grep -q 'class="compat-box"' /tmp/yozeum_resp.html; then
   echo "PASS  점수 파라미터 없으면 일치율 블록이 나타나지 않음"
   pass=$((pass+1))
@@ -354,8 +358,8 @@ else
   fail=$((fail+1))
 fi
 check_status "범위 밖 점수(999)는 무시하고 정상 렌더링" "$BASE/q/meta-sensing/r/detective?s=999" 200
-check_status "다른 퀴즈(vibe-shift)도 점수 결합 정상 동작" "$BASE/q/vibe-shift/r/steady?s=62" 200
-check_contains "vibe-shift 결과에도 일치율 표시" "$BASE/q/vibe-shift/r/steady?s=62" "62%"
+check_status "다른 퀴즈(vibe-shift)도 점수 결합 정상 동작" "$BASE/q/vibe-shift/r/steady?s=63" 200
+check_contains "vibe-shift 결과에도 가능한 일치율 표시" "$BASE/q/vibe-shift/r/steady?s=63" "63%"
 
 echo ""
 echo "=== 신규 트렌드 테스트: 전생/연애 스타일 ==="
@@ -365,8 +369,8 @@ check_contains "전생 테스트 결과에 유형명 노출" "$BASE/q/past-life/
 check_status "연애 스타일 테스트 페이지" "$BASE/q/love-style" 200
 check_status "연애 스타일 결과 페이지" "$BASE/q/love-style/r/direct" 200
 check_contains "연애 스타일 결과에 유형명 노출" "$BASE/q/love-style/r/direct" "직진끝판왕형"
-check_status "신규 퀴즈도 일치율 결합 정상 동작" "$BASE/q/past-life/r/mystic?s=73" 200
-check_contains "신규 퀴즈 결과에도 일치율 표시" "$BASE/q/past-life/r/mystic?s=73" "73%"
+check_status "신규 퀴즈도 일치율 결합 정상 동작" "$BASE/q/past-life/r/mystic?s=75" 200
+check_contains "신규 퀴즈 결과에도 가능한 일치율 표시" "$BASE/q/past-life/r/mystic?s=75" "75%"
 
 echo ""
 echo "=== 신규: 테토·에겐 유형 테스트 ==="
