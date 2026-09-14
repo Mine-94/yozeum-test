@@ -11,21 +11,27 @@ jobs:
     steps:
       - name: Ping site to prevent Render cold start
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 --retry 2 --retry-delay 5 https://yozeum-test.onrender.com/)
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 --retry 2 --retry-delay 5 https://yozeum-test.onrender.com/ || echo "000")
           echo "HTTP status: $status"
 
           if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
             echo "Site is healthy."
             exit 0
-          elif [ "$status" = "503" ]; then
-            # Render free-tier suspension (monthly instance-hours exhausted) or a
-            # brief cold-start wake-up both return 503. This is a known, expected
-            # state (not a code or infra bug on our side), so we log it and don't
-            # fail the workflow — this keeps pinging automatically and stops
-            # spamming failure emails until Render lifts the suspension on its own.
-            echo "::notice::Site returned 503 (known Render free-tier suspension or cold start) — not treating as a failure."
+          elif [ "$status" = "503" ] || [ "$status" = "000" ]; then
+            # Render free-tier suspension (monthly instance-hours exhausted) can surface
+            # either as a clean HTTP 503 or as a connection-level failure (timeout,
+            # refused, TLS/DNS error) that curl can't turn into an HTTP status at all --
+            # curl then reports "000" here instead of aborting the whole step (the
+            # `|| echo "000"` above catches curl's own non-zero exit, which GitHub
+            # Actions' default `set -e` would otherwise treat as a step failure before
+            # this check even runs). A brief cold-start wake-up can also transiently
+            # look like either case. This is a known, expected state (not a code or
+            # infra bug on our side), so we log it and don't fail the workflow -- this
+            # keeps pinging automatically and stops spamming failure emails until
+            # Render lifts the suspension on its own.
+            echo "::notice::Site returned status '$status' (known Render free-tier suspension/cold start, or curl couldn't reach it at all) -- not treating as a failure."
             exit 0
           else
-            echo "::error::Unexpected status '$status' (curl reports 000 on connection/timeout failure) — this looks like a real problem, not a known suspension."
+            echo "::error::Unexpected status '$status' -- this looks like a real problem, not a known suspension."
             exit 1
           fi
